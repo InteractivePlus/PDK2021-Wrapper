@@ -232,12 +232,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "4037b2a5748bdd262ef936caf2a453a7109e2378"
+                "reference": "11bfba788abe4fe5a3ef6a27cb42dd03a82e16d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/4037b2a5748bdd262ef936caf2a453a7109e2378",
-                "reference": "4037b2a5748bdd262ef936caf2a453a7109e2378",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/11bfba788abe4fe5a3ef6a27cb42dd03a82e16d6",
+                "reference": "11bfba788abe4fe5a3ef6a27cb42dd03a82e16d6",
                 "shasum": ""
             },
             "require": {
@@ -266,7 +266,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-01-16T07:25:35+00:00"
+            "time": "2021-01-16T08:16:41+00:00"
         },
         {
             "name": "nikic/fast-route",

@@ -92,7 +92,7 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
             $dataRow['pdk_exception_code'],
             empty($dataRow['client_addr']) ? null : $dataRow['client_addr'],
             empty($dataRow['log_message']) ? null : $dataRow['log_message'],
-            empty($dataRow['log_context']) ? null : gzuncompress($dataRow['log_context'])
+            empty($dataRow['log_context']) ? null : json_decode(gzuncompress($dataRow['log_context']),true)
         );
         return $newEntity;
     }
