@@ -102,7 +102,7 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         $this->db->where('vericode_str',VeriCodeFormat::formatVerificationCode($veriCodeString));
         $rowData = $this->db->getOne('verification_codes');
         if(!$rowData){
-            throw new PDKStorageEngineError('failed to fetch data',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
+            return null;
         }
         return $this->VeriCodeEntityFromDataRow($rowData);
     }
