@@ -1,0 +1,28 @@
+{
+    "name": "interactiveplus/pdk-2021-wrapper",
+    "description": "Outer Wrapper for InteractivePDK2021",
+    "type": "library",
+    "license": "MIT",
+    "require":{
+        "php": ">=7.4.0",
+        "interactiveplus/lib-i18n":"~0.0",
+        "phpmailer/phpmailer": "~6.1",
+        "interactiveplus/pdk-2021-corelib":"dev-main",
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.3",
+        "thingengineer/mysqli-database-class": "dev-master"
+    },
+    "require-dev":{
+        "phpunit/phpunit": "^9"
+    },
+    "autoload":{
+        "psr-4":{
+            "InteractivePlus\\PDK2021\\": "src/"
+        }
+    },
+    "autoload-dev":{
+        "psr-4":{
+            "InteractivePlus\\PDK2021Test\\": "test/"
+        }
+    }
+}
