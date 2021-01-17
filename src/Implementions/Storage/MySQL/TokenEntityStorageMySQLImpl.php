@@ -1,5 +1,5 @@
 <?php
-namespace InteractivePlus\PDK2021\Implementions\MySQL;
+namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
 use InteractivePlus\PDK2021Core\Base\DataOperations\MultipleResult;
@@ -19,7 +19,9 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
     public function createTables() : void{
         $ipMaxLen = IPFormat::IPV6_STR_MAX_LEN;
         $tokenMaxLen = TokenFormat::getTokenStringLength();
-        $createResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $createResult = $mysqli->query(
             "CREATE TABLE IF NOT EXISTS `login_infos` (
                 `related_uid` INT UNSIGNED NOT NULL,
                 `access_token` CHAR({$tokenMaxLen}) NOT NULL,
@@ -30,7 +32,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
                 `refresh_expire_time` INT UNSIGNED NOT NULL,
                 `remote_addr` VARCHAR({$ipMaxLen}),
                 `device_ua` TINYTEXT,
-                `valid` TINYINT(1) NOT NULL
+                `valid` TINYINT(1) NOT NULL,
                 PRIMARY KEY ( `access_token`, `refresh_token` )
             )ENGINE=InnoDB CHARSET=utf8;"
         );
@@ -39,7 +41,9 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         }
     }
     public function clearTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'TRUNCATE TABLE `login_infos`;'
         );
         if(!$deleteResult){
@@ -47,7 +51,9 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         }
     }
     public function deleteTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'DROP TABLE `login_infos`;'
         );
         if(!$deleteResult){
@@ -72,12 +78,12 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
             throw new PDKStorageEngineError('failed to insert data into database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }
-    protected function __checkTokenExist(string $TokenString) : bool{
+    public function checkTokenExist(string $TokenString) : bool{
         $this->db->where('access_token',$TokenString);
         $count = $this->db->getValue('login_infos','count(*)');
         return $count >= 1;
     }
-    protected function __checkRefreshTokenExist(string $RefreshTokenString) : bool{
+    public function checkRefreshTokenExist(string $RefreshTokenString) : bool{
         $this->db->where('refresh_token',$RefreshTokenString);
         $count = $this->db->getValue('login_infos','count(*)');
         return $count >= 1;

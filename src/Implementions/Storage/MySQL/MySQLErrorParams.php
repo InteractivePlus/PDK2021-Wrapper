@@ -1,5 +1,5 @@
 <?php
-namespace InteractivePlus\PDK2021\Implementions\MySQL;
+namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
 use MysqliDb;
 

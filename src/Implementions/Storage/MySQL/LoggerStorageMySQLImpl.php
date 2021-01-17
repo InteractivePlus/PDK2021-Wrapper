@@ -1,5 +1,5 @@
 <?php
-namespace InteractivePlus\PDK2021\Implementions\MySQL;
+namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
@@ -19,14 +19,16 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
     }
     public function createTables() : void{
         $ipMaxLen = IPFormat::IPV6_STR_MAX_LEN;
-        $createResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $createResult = $mysqli->query(
             "CREATE TABLE IF NOT EXISTS `logs` (
                 `action_id` INT NOT NULL,
                 `app_uid` INT UNSIGNED,
                 `user_uid` INT UNSIGNED,
                 `log_time` INT UNSIGNED NOT NULL,
                 `log_level` TINYINT UNSIGNED NOT NULL,
-                `log_message` TINYTEXT,
+                `log_message` TEXT,
                 `operation_success` TINYINT(1),
                 `pdk_exception_code` INT NOT NULL,
                 `client_addr` VARCHAR({$ipMaxLen}),
@@ -38,7 +40,9 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
         }
     }
     public function clearTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'TRUNCATE TABLE `logs`;'
         );
         if(!$deleteResult){
@@ -46,7 +50,9 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
         }
     }
     public function deleteTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'DROP TABLE `logs`;'
         );
         if(!$deleteResult){

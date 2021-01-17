@@ -1,5 +1,5 @@
 <?php
-namespace InteractivePlus\PDK2021\Implementions\MySQL;
+namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
@@ -9,6 +9,7 @@ use InteractivePlus\PDK2021Core\Base\Formats\IPFormat;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeEntity;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeFormat;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeID;
+use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeIDs;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeStorage;
 use MysqliDb;
 
@@ -21,7 +22,9 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
     public function createTables() : void{
         $ipMaxLen = IPFormat::IPV6_STR_MAX_LEN;
         $veriCodeStrLen = VeriCodeFormat::getVeriCodeStringLength();
-        $createResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $createResult = $mysqli->query(
             "CREATE TABLE IF NOT EXISTS `verification_codes` (
                 `vericode_id` INT UNSIGNED NOT NULL,
                 `trigger_client_addr` VARCHAR({$ipMaxLen}),
@@ -41,7 +44,9 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         }
     }
     public function clearTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'TRUNCATE TABLE `verification_codes`;'
         );
         if(!$deleteResult){
@@ -49,7 +54,9 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         }
     }
     public function deleteTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'DROP TABLE `verification_codes`;'
         );
         if(!$deleteResult){
@@ -74,7 +81,7 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
             throw new PDKStorageEngineError('Failed to insert data',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }
-    protected function __checkVeriCodeExist(string $veriCodeString) : bool{
+    public function checkVeriCodeExist(string $veriCodeString) : bool{
         $this->db->where('vericode_str',VeriCodeFormat::formatVerificationCode($veriCodeString));
         $count = $this->db->getValue('verification_codes','count(*)');
         if($count >= 1){
@@ -85,7 +92,7 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
     }
     protected function VeriCodeEntityFromDataRow(array $dataRow) : VeriCodeEntity{
         $newEntity = new VeriCodeEntity(
-            VeriCodeID::findVeriCodeID($dataRow['vericode_id']),
+            VeriCodeIDs::findVeriCodeID($dataRow['vericode_id']),
             $dataRow['issue_time'],
             $dataRow['expire_time'],
             empty($dataRow['related_uid']) ? UserSystemConstants::NO_USER_RELATED_UID : $dataRow['related_uid'],

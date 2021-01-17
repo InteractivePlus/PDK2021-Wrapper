@@ -1,5 +1,5 @@
 <?php
-namespace InteractivePlus\PDK2021\Implementions\MySQL;
+namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
 use InteractivePlus\PDK2021Core\Base\DataOperations\MultipleResult;
@@ -34,7 +34,9 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
         $emailStrLen = $this->getFormatSetting()->getEmailAddrMaxLen();
         
 
-        $createResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $createResult = $mysqli->query(
             "CREATE TABLE IF NOT EXISTS `user_infos` (
                 `uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `username` VARCHAR({$usernameStrLen}) NOT NULL,
@@ -56,7 +58,9 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
         }
     }
     public function clearTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'TRUNCATE TABLE `user_infos`;'
         );
         if(!$deleteResult){
@@ -64,7 +68,9 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
         }
     }
     public function deleteTables() : void{
-        $deleteResult = $this->db->rawQuery(
+        $mysqli = $this->db->mysqli();
+        
+        $deleteResult = $mysqli->query(
             'DROP TABLE `user_infos`;'
         );
         if(!$deleteResult){
@@ -117,23 +123,23 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
         }
         return $this->db->count >= 1;
     }
-    protected function __checkUsernameExist(string $username) : int{
+    public function checkUsernameExist(string $username) : int{
         $this->db->where('username',$username);
         $uid = $this->db->getValue('user_infos','uid');
         return $uid === null ? -1 : $uid;
     }
-    protected function __checkEmailExist(string $email) : int{
+    public function checkEmailExist(string $email) : int{
         $this->db->where('email',$email);
         $uid = $this->db->getValue('user_infos','uid');
         return $uid === null ? -1 : $uid;
     }
-    protected function __checkPhoneNumExist(PhoneNumber $phoneNumber) : int{
+    public function checkPhoneNumExist(PhoneNumber $phoneNumber) : int{
         $this->db->where('phone',UserPhoneUtil::outputPhoneNumberE164($phoneNumber));
         $uid = $this->db->getValue('user_infos','uid');
         return $uid === null ? -1 : $uid;
     }
 
-    protected function __checkNicknameExist(string $nickname) : int{
+    public function checkNicknameExist(string $nickname) : int{
         $this->db->where('nickname',$nickname);
         $uid = $this->db->getValue('user_infos','uid');
         return $uid === null ? -1 : $uid;
