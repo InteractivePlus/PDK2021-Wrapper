@@ -1,12 +1,14 @@
 <?php
 namespace InteractivePlus\PDK2021;
 
+use InteractivePlus\PDK2021\Implementions\Sender\LocalFileSMSServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Sender\SendGridEmailServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\TokenEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\UserEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\VeriCodeStorageMySQLImpl;
 use InteractivePlus\PDK2021Core\Communication\VeriSender\Implementions\VeriCodeEmailSenderImplWithProvider;
+use InteractivePlus\PDK2021Core\Communication\VeriSender\Implementions\VeriCodeSMSSenderImplWithService;
 use InteractivePlus\PDK2021Core\PDKCore;
 use InteractivePlus\PDK2021Core\User\UserInfo\UserEntity;
 use MysqliDb;
@@ -27,11 +29,16 @@ class PDK2021Wrapper{
             new SendGridEmailServiceProvider($config->SENDGRID_APIKEY,$config->SENDGRID_FROM_ADDR,$config->SENDGRID_FROM_NAME),
             new EmailContentProvider()
         );
+        $SMSSender = new VeriCodeSMSSenderImplWithService(
+            new LocalFileSMSServiceProvider(__DIR__ . '/../LocalFileServiceProvider/SMS.json'),
+            new SMSContentProvider,
+            ' 【形随意动用户系统团队】'
+        );
         self::$pdkCore = new PDKCore(
             $LoggerStorage,
             $VeriCodeStorage,
             $EmailSender,
-            null,
+            $SMSSender,
             null,
             $UserEntityStorage,
             $TokenEntityStorage

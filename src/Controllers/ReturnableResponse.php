@@ -1,11 +1,13 @@
 <?php
 namespace InteractivePlus\PDK2021\Controllers;
 
+use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKCredentialDismatchError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerArgumentError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKUnknownInnerError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemAlreadyExistError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemExpiredOrUsedError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemNotFoundError;
+use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKPermissionDeniedError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKRequestParamFormatError;
 use InteractivePlus\PDK2021Core\Base\Exception\PDKErrCode;
 use InteractivePlus\PDK2021Core\Base\Exception\PDKException;
@@ -57,7 +59,7 @@ class ReturnableResponse implements Stringable{
         $response->getBody()->write($this->toJSONResponseBody());
         return $response->withHeader('Content-type','application/json')->withStatus($this->returnHTTPCode);
     }
-    public static function fromPDKException(PDKException $e) : ReturnableResponse{
+    public static function fromPDKException(PDKException $e, bool $displayErrorDetail = true) : ReturnableResponse{
         $htmlReturnCode = 0;
         
         if($e->getCode() === 0){
@@ -75,21 +77,25 @@ class ReturnableResponse implements Stringable{
             $htmlReturnCode,
             $e->getCode()
         );
-        $response->errorDescription = $e->getMessage();
-        $response->errorFile = $e->getFile();
-        $response->errorFileLineNo = $e->getLine();
-        $response->returnFirstLevelEntries = $e->toReponseJSON();
+        if($displayErrorDetail){
+            $response->errorDescription = $e->getMessage();
+            $response->errorFile = $e->getFile();
+            $response->errorFileLineNo = $e->getLine();
+            $response->returnFirstLevelEntries = $e->toReponseJSON();
+        }
         return $response;
     }
-    public static function fromThrowable(Throwable $e) : ReturnableResponse{
+    public static function fromThrowable(Throwable $e, bool $displayErrorDetail = true) : ReturnableResponse{
         $htmlReturnCode = 500;
         $response = new ReturnableResponse(
             $htmlReturnCode,
             PDKErrCode::UNKNOWN_INNER_ERROR
         );
-        $response->errorDescription = $e->getMessage();
-        $response->errorFile = $e->getFile();
-        $response->errorFileLineNo = $e->getLine();
+        if($displayErrorDetail){
+            $response->errorDescription = $e->getMessage();
+            $response->errorFile = $e->getFile();
+            $response->errorFileLineNo = $e->getLine();
+        }
         return $response;
     }
     public static function fromIncorrectFormattedParam(string $paramName) : ReturnableResponse{
@@ -128,6 +134,22 @@ class ReturnableResponse implements Stringable{
         $response = self::fromPDKException(
             new PDKItemExpiredOrUsedError(
                 $item
+            )
+        );
+        return $response;
+    }
+    public static function fromPermissionDeniedError(?string $message = null) : ReturnableResponse{
+        $response = self::fromPDKException(
+            new PDKPermissionDeniedError(
+                $message
+            )
+        );
+        return $response;
+    }
+    public static function fromCredentialMismatchError(string $credential) : ReturnableResponse{
+        $response = self::fromPDKException(
+            new PDKCredentialDismatchError(
+                $credential
             )
         );
         return $response;

@@ -59,7 +59,7 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
             throw new PDKStorageEngineError('Failed to drop table',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }
-    public function addLogItem(LogEntity $logEntity) : void{
+    public function addLogItem(LogEntity $logEntity) : bool{
         $dataToAdd = array(
             'action_id' => $logEntity->actionID,
             'app_uid' => $logEntity->getAPPUID() === APPSystemConstants::NO_APP_RELATED_APPUID ? null : $logEntity->getAPPUID(),
@@ -74,7 +74,7 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
         );
         $addRst = $this->db->insert('logs',$dataToAdd);
         if(!$addRst){
-            throw new PDKStorageEngineError('Failed to insert data',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
+            return false;
         }
     }
     public function deleteLogItems(int $fromTime = -1, int $toTime = -1, int $highestLogLevel = PDKLogLevel::INFO) : void{

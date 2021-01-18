@@ -180,6 +180,39 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         );
     }
 
+    public function searchPhoneVeriCode(int $expireTimeMin = 0, int $expireTimeMax = 0, int $uid = UserSystemConstants::NO_USER_RELATED_UID, int $appuid = APPSystemConstants::NO_APP_RELATED_APPUID, string $partialVericodeStr) : MultipleResult{
+        if($expireTimeMin > 0){
+            $this->db->where('expire_time',$expireTimeMin, '>=');
+        }
+        if($expireTimeMax > 0){
+            $this->db->where('expire_time',$expireTimeMax,'<=');
+        }
+        if($uid !== UserSystemConstants::NO_USER_RELATED_UID){
+            $this->db->where('related_uid',$uid);
+        }
+        if($uid !== UserSystemConstants::NO_USER_RELATED_UID){
+            $this->db->where('related_uid',$uid);
+        }
+        if($appuid !== APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('related_appuid',$appuid);
+        }
+        $this->db->where('vericode_str',$partialVericodeStr . '%','LIKE');
+        $result = $this->db->withTotalCount()->get('verification_codes');
+        if(!$result){
+            throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
+        }
+        $resultObjArr = array();
+        foreach($result as $singleRowData){
+            $resultObjArr[] = $this->VeriCodeEntityFromDataRow($singleRowData);
+        }
+        return new MultipleResult(
+            $this->db->count,
+            $resultObjArr,
+            $this->db->totalCount,
+            0
+        );
+    }
+
     public function clearVeriCode(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $uid = UserSystemConstants::NO_USER_RELATED_UID, int $appuid = APPSystemConstants::NO_APP_RELATED_APPUID) : void{
         if($issueTimeMin > 0){
             $this->db->where('issue_time',$issueTimeMin,'>=');

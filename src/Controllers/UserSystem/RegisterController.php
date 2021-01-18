@@ -93,54 +93,30 @@ class RegisterController{
         $veriCodeStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
         //Let's send out verification Email and SMS
         if(!empty($updatedUsrEntity->getEmail())){
-            $verifyEmailEntity = new VeriCodeEntity(
-                VeriCodeIDs::VERICODE_VERIFY_EMAIL(),
+            $optionalPDKException = PDK2021Wrapper::$pdkCore->createAndSendVerificationEmail(
+                $updatedUsrEntity->getEmail(),
+                $updatedUsrEntity,
                 $ctime,
-                $ctime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
-                $updatedUsrEntity->getUID(),
-                APPSystemConstants::INTERACTIVEPDK_APPUID,
-                null,
+                PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
                 $REMOTE_ADDR
             );
-            while($veriCodeStorage->checkVeriCodeExist($verifyEmailEntity->getVeriCodeString())){
-                $verifyEmailEntity = $verifyEmailEntity->withVeriCodeStringReroll();
-            }
-            try{
-                PDK2021Wrapper::$pdkCore->getVeriCodeEmailSender()->sendVeriCode($verifyEmailEntity,$updatedUsrEntity,$updatedUsrEntity->getEmail());
-            }catch(PDKSenderServiceError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
-            }
-            $verifyEmailEntity = $verifyEmailEntity->withSentMethod(SentMethod::EMAIL);
-            try{
-                $veriCodeStorage->addVeriCodeEntity($verifyEmailEntity,false);
-            }catch(PDKStorageEngineError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
+            if($optionalPDKException !== null){
+                return ReturnableResponse::fromPDKException($optionalPDKException)->toResponse($response);
             }
         }
+        $phoneVerificationMethodReceiver = SentMethod::NOT_SENT;
         if($updatedUsrEntity->getPhoneNumber() !== null){
-            $verifyPhoneEntity = new VeriCodeEntity(
-                VeriCodeIDs::VERICODE_VERIFY_PHONE(),
+            $optionalPDKException = PDK2021Wrapper::$pdkCore->createAndSendVerificationPhone(
+                $updatedUsrEntity->getPhoneNumber(),
+                $updatedUsrEntity,
                 $ctime,
-                $ctime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
-                $updatedUsrEntity->getUID(),
-                APPSystemConstants::INTERACTIVEPDK_APPUID,
-                null,
-                $REMOTE_ADDR
+                PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
+                $phoneVerificationMethodReceiver,
+                $REMOTE_ADDR,
+                true
             );
-            while($veriCodeStorage->checkVeriCodeExist($verifyPhoneEntity->getVeriCodeString())){
-                $verifyPhoneEntity = $verifyPhoneEntity->withVeriCodeStringReroll();
-            }
-            $methodReceiver = SentMethod::NOT_SENT;
-            try{
-                PDK2021Wrapper::$pdkCore->getPhoneSender($methodReceiver,true)->sendVeriCode($verifyPhoneEntity,$updatedUsrEntity,$updatedUsrEntity->getPhoneNumber());
-            }catch(PDKSenderServiceError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
-            }
-            $verifyPhoneEntity = $verifyPhoneEntity->withSentMethod($methodReceiver);
-            try{
-                $veriCodeStorage->addVeriCodeEntity($verifyPhoneEntity,false);
-            }catch(PDKStorageEngineError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
+            if($optionalPDKException !== null){
+                return ReturnableResponse::fromPDKException($optionalPDKException)->toResponse($response);
             }
         }
         $returnable = new ReturnableResponse(201,0);
@@ -148,7 +124,8 @@ class RegisterController{
             'uid' => $updatedUsrEntity->getUID(),
             'username' => $updatedUsrEntity->getUsername(),
             'email' => $updatedUsrEntity->getEmail(),
-            'phone' => ($updatedUsrEntity->getPhoneNumber() === null) ? null : UserPhoneUtil::outputPhoneNumberE164($updatedUsrEntity->getPhoneNumber())
+            'phone' => ($updatedUsrEntity->getPhoneNumber() === null) ? null : UserPhoneUtil::outputPhoneNumberE164($updatedUsrEntity->getPhoneNumber()),
+            'phoneVerificationSentMethod' => $phoneVerificationMethodReceiver
         );
         return $returnable->toResponse($response);
     }
