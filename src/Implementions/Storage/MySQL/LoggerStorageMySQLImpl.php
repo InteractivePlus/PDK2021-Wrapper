@@ -76,6 +76,7 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
         if(!$addRst){
             return false;
         }
+        return true;
     }
     public function deleteLogItems(int $fromTime = -1, int $toTime = -1, int $highestLogLevel = PDKLogLevel::INFO) : void{
         if($fromTime > 0){

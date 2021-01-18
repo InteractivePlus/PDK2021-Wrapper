@@ -61,7 +61,7 @@ $customErrorHandler = function(
                 )
             );
         }catch(Throwable $e){
-            
+
         }
     }else if($logErrors){
         try{
@@ -80,9 +80,11 @@ $app->post('/user',RegisterController::class . ':register');
 $app->post('/user/token',LoginController::class . ':login');
 $app->get('/user/token/checkTokenResult',LoginController::class . ':checkTokenValid');
 $app->get('/user/token/refreshResult',LoginController::class . ':refreshToken');
+$app->delete('/user/token/{access_token}',LoginController::class . ':logout');
 $app->get('/vericodes/verifyEmailResult/{veriCode}',VeriCodeController::class . ':verifyEmail');
 $app->get('/vericodes/verifyPhoneResult/{veriCode}',VeriCodeController::class . ':verifyPhone');
 $app->post('/vericodes/sendAnotherVerifyEmailRequest',VeriCodeController::class . ':requestVerificationEmailResend');
 $app->post('/vericodes/sendAnotherVerifyPhoneRequest',VeriCodeController::class . ':requestVerificationPhoneResend');
+
 
 $app->run();
