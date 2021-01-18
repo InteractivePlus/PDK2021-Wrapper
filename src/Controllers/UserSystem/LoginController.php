@@ -94,29 +94,13 @@ class LoginController{
         return $successReturn->toResponse($response);
     }
     public function checkTokenValid(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
-        $REQ_QUERY_PARAMS = $request->getQueryParams();
-        $REQ_ACCESS_TOKEN = $REQ_QUERY_PARAMS['access_token'];
-        $REQ_UID = $REQ_QUERY_PARAMS['uid'];
+        $REQ_ACCESS_TOKEN = $args['access_token'];
+        $REQ_UID = $args['uid'];
         $ctime = time();
 
-        if(!TokenFormat::isValidToken($REQ_ACCESS_TOKEN)){
-            return ReturnableResponse::fromIncorrectFormattedParam('access_token')->toResponse($response);
-        }
-        if(empty($REQ_UID) || $REQ_UID < 0){
-            return ReturnableResponse::fromIncorrectFormattedParam('uid')->toResponse($response);
-        }else{
-            $REQ_UID = (int) $REQ_UID;
-        }
-        $TokenEntityStorage = PDK2021Wrapper::$pdkCore->getTokenEntityStorage();
-        $TokenEntity = $TokenEntityStorage->getTokenEntity($REQ_ACCESS_TOKEN);
-        if($TokenEntity === null){
-            return ReturnableResponse::fromCredentialMismatchError('access_token')->toResponse($response);
-        }
-        if($TokenEntity->getRelatedUID() !== $REQ_UID){
-            return ReturnableResponse::fromCredentialMismatchError('access_token')->toResponse($response);
-        }
-        if(!$TokenEntity->isValid($ctime)){
-            return ReturnableResponse::fromItemExpiredOrUsedError('access_token')->toResponse($response);
+        $returnVal = self::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        if($returnVal !== null){
+            return $returnVal->toResponse($response);
         }
         $returnResult = new ReturnableResponse(200,0);
         return $returnResult->toResponse($response);
@@ -124,7 +108,7 @@ class LoginController{
     public function refreshToken(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
         $REQ_QUERY_PARAMS = $request->getQueryParams();
         $REQ_REFRESH_TOKEN = $REQ_QUERY_PARAMS['refresh_token'];
-        $REQ_UID = $REQ_QUERY_PARAMS['uid'];
+        $REQ_UID = $args['uid'];
         $REMOTE_ADDR = $request->getAttribute('ip');
         $DEVICE_UA = empty($request->getHeader('User-Agent')) ? null : implode('; ',$request->getHeader('User-Agent'));
         $ctime = time();
@@ -184,7 +168,7 @@ class LoginController{
     public function logout(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
         $REQ_QUERY_PARAMS = $request->getQueryParams();
         $REQ_ACCESS_TOKEN = $args['access_token'];
-        $REQ_UID = $REQ_QUERY_PARAMS['uid'];
+        $REQ_UID = $args['uid'];
         $ctime = time();
 
         if(!TokenFormat::isValidToken($REQ_ACCESS_TOKEN)){
@@ -214,5 +198,31 @@ class LoginController{
         }
         $returnResult = new ReturnableResponse(204,0);
         return $returnResult->toResponse($response);
+    }
+    public static function checkTokenValidResponse($uid, ?string $access_token, int $currentTime) : ?ReturnableResponse{
+        $REQ_ACCESS_TOKEN = $access_token;
+        $REQ_UID = $uid;
+        $ctime = $currentTime;
+
+        if(empty($REQ_ACCESS_TOKEN) || !TokenFormat::isValidToken($REQ_ACCESS_TOKEN)){
+            return ReturnableResponse::fromIncorrectFormattedParam('access_token');
+        }
+        if(empty($REQ_UID) || $REQ_UID < 0){
+            return ReturnableResponse::fromIncorrectFormattedParam('uid');
+        }else{
+            $REQ_UID = (int) $REQ_UID;
+        }
+        $TokenEntityStorage = PDK2021Wrapper::$pdkCore->getTokenEntityStorage();
+        $TokenEntity = $TokenEntityStorage->getTokenEntity($REQ_ACCESS_TOKEN);
+        if($TokenEntity === null){
+            return ReturnableResponse::fromCredentialMismatchError('access_token');
+        }
+        if($TokenEntity->getRelatedUID() !== $REQ_UID){
+            return ReturnableResponse::fromCredentialMismatchError('access_token');
+        }
+        if(!$TokenEntity->isValid($ctime)){
+            return ReturnableResponse::fromItemExpiredOrUsedError('access_token');
+        }
+        return null;
     }
 }

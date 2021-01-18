@@ -33,13 +33,13 @@ class SMSContentProvider implements VeriCodeSMSAndCallContentGenerator{
     public function getContentForChangeEmail(VeriCodeEntity $veriCodeEntity, UserEntity $relatedUser, string $newEmail) : string{
         $userNick = empty($relatedUser->getNickName()) ? $relatedUser->getUsername() : $relatedUser->getNickName();
         $phoneVeriCode = $veriCodeEntity->getVeriCodePartialPhoneCode();
-        $message = "亲爱的{$userNick}, 您正在更改密保邮箱, 验证码为：{$phoneVeriCode}";
+        $message = "亲爱的{$userNick}, 您正在更改密保邮箱为{$newEmail}, 验证码为：{$phoneVeriCode}";
         return $message; 
     }
     public function getContentForChangePhone(VeriCodeEntity $veriCodeEntity, UserEntity $relatedUser, string $newPhone) : string{
         $userNick = empty($relatedUser->getNickName()) ? $relatedUser->getUsername() : $relatedUser->getNickName();
         $phoneVeriCode = $veriCodeEntity->getVeriCodePartialPhoneCode();
-        $message = "亲爱的{$userNick}, 您正在更改密保手机, 验证码为：{$phoneVeriCode}";
+        $message = "亲爱的{$userNick}, 您正在更改密保手机为{$newPhone}, 验证码为：{$phoneVeriCode}";
         return $message; 
     }
     public function getContentForAdminAction(VeriCodeEntity $veriCodeEntity, UserEntity $relatedUser) : string{

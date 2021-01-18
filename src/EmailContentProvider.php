@@ -77,7 +77,7 @@ class EmailContentProvider implements VeriCodeEmailContentGenerator{
         <html>
         <body>
             <p style=\"text-align:left\">亲爱的{$userNick},</p>
-            <p style=\"text-align:center\">您正在修改您的密保邮箱,您的验证码为:</p>
+            <p style=\"text-align:center\">您正在修改您的密保邮箱,修改后邮箱变更为{$newEmail},您的验证码为:</p>
             <p style=\"text-align:center;font-size:2.5em\">{$veriCodeEntity->getVeriCodeString()}</p>
             <p style=\"text-align:right\">此致, </p>
             <p style=\"text-align:right\">形随意动用户系统团队</p>
@@ -93,7 +93,7 @@ class EmailContentProvider implements VeriCodeEmailContentGenerator{
         <html>
         <body>
             <p style=\"text-align:left\">亲爱的{$userNick},</p>
-            <p style=\"text-align:center\">您正在修改密保手机,您的验证码为:</p>
+            <p style=\"text-align:center\">您正在修改密保手机,修改后手机变更为{$newPhone},您的验证码为:</p>
             <p style=\"text-align:center;font-size:2.5em\">{$veriCodeEntity->getVeriCodeString()}</p>
             <p style=\"text-align:right\">此致, </p>
             <p style=\"text-align:right\">形随意动用户系统团队</p>
