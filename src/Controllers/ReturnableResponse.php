@@ -2,8 +2,9 @@
 namespace InteractivePlus\PDK2021\Controllers;
 
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerArgumentError;
-use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerError;
+use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKUnknownInnerError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemAlreadyExistError;
+use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemExpiredOrUsedError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemNotFoundError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKRequestParamFormatError;
 use InteractivePlus\PDK2021Core\Base\Exception\PDKErrCode;
@@ -117,8 +118,16 @@ class ReturnableResponse implements Stringable{
     }
     public static function fromInnerError(?string $message = null) : ReturnableResponse{
         $response = self::fromPDKException(
-            new PDKInnerError(
+            new PDKUnknownInnerError(
                 empty($message) ? '' : $message
+            )
+        );
+        return $response;
+    }
+    public static function fromItemExpiredOrUsedError(string $item) : ReturnableResponse{
+        $response = self::fromPDKException(
+            new PDKItemExpiredOrUsedError(
+                $item
             )
         );
         return $response;

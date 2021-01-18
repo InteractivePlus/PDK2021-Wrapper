@@ -153,7 +153,7 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
             $dataRow['signature'],
             $dataRow['password'],
             $dataRow['email'],
-            UserPhoneUtil::parsePhone($dataRow['phone'],self::PHONE_DEFAULT_COUNTRY),
+            empty($dataRow['phone']) ? null : UserPhoneUtil::parsePhone($dataRow['phone'],self::PHONE_DEFAULT_COUNTRY),
             $dataRow['email_verified'] === 1 ? true : false,
             $dataRow['phone_verified'] === 1 ? true : false,
             $dataRow['create_time'],

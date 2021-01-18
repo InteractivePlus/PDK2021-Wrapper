@@ -1,6 +1,7 @@
 <?php
 
 use InteractivePlus\PDK2021\Controllers\UserSystem\RegisterController;
+use InteractivePlus\PDK2021\Controllers\VeriCode\VeriCodeController;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\PDKCore;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -23,5 +24,6 @@ $app->addMiddleware(new RKA\Middleware\IpAddress(PDK2021Wrapper::$config->SLIM_C
 
 
 $app->post('/user',RegisterController::class . ':register');
+$app->get('/vericodes/verifyEmailResult/{veriCode}',VeriCodeController::class . ':verifyEmail');
 
 $app->run();
