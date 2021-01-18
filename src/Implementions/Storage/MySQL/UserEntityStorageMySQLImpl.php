@@ -198,13 +198,13 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
     }
     public function searchUserIdentity(?string $username = null, ?string $email = null, ?string $number = null, int $regTimeStart = -1, int $regTimeEnd = -1, int $dataOffset = 0, int $dataCountLimit = -1) : MultipleResult{
         if(!empty($username)){
-            $this->db->where('username',$username,'LIKE');
+            $this->db->where('username','%' . $username '%','LIKE');
         }
         if(!empty($email)){
-            $this->db->where('email',$email,'LIKE');
+            $this->db->where('email','%' . $email . '%','LIKE');
         }
         if(!empty($number)){
-            $this->db->where('phone',$number,'LIKE');
+            $this->db->where('phone','%' . $number . '%','LIKE');
         }
         if($regTimeStart > 0){
             $this->db->where('create_time',$regTimeStart,'>=');
