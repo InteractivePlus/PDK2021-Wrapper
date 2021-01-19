@@ -15,6 +15,32 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class LoginController{
+    public static function checkTokenValidResponse($uid, ?string $access_token, int $currentTime) : ?ReturnableResponse{
+        $REQ_ACCESS_TOKEN = $access_token;
+        $REQ_UID = $uid;
+        $ctime = $currentTime;
+
+        if(empty($REQ_ACCESS_TOKEN) || !TokenFormat::isValidToken($REQ_ACCESS_TOKEN)){
+            return ReturnableResponse::fromIncorrectFormattedParam('access_token');
+        }
+        if(empty($REQ_UID) || $REQ_UID < 0){
+            return ReturnableResponse::fromIncorrectFormattedParam('uid');
+        }else{
+            $REQ_UID = (int) $REQ_UID;
+        }
+        $TokenEntityStorage = PDK2021Wrapper::$pdkCore->getTokenEntityStorage();
+        $TokenEntity = $TokenEntityStorage->getTokenEntity($REQ_ACCESS_TOKEN);
+        if($TokenEntity === null){
+            return ReturnableResponse::fromCredentialMismatchError('access_token');
+        }
+        if($TokenEntity->getRelatedUID() !== $REQ_UID){
+            return ReturnableResponse::fromCredentialMismatchError('access_token');
+        }
+        if(!$TokenEntity->isValid($ctime)){
+            return ReturnableResponse::fromItemExpiredOrUsedError('access_token');
+        }
+        return null;
+    }
     public function login(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
         $REQ_PARAMS = json_decode($request->getBody(),true);
         $REQ_USERNAME = $REQ_PARAMS['username'];
@@ -198,31 +224,5 @@ class LoginController{
         }
         $returnResult = new ReturnableResponse(204,0);
         return $returnResult->toResponse($response);
-    }
-    public static function checkTokenValidResponse($uid, ?string $access_token, int $currentTime) : ?ReturnableResponse{
-        $REQ_ACCESS_TOKEN = $access_token;
-        $REQ_UID = $uid;
-        $ctime = $currentTime;
-
-        if(empty($REQ_ACCESS_TOKEN) || !TokenFormat::isValidToken($REQ_ACCESS_TOKEN)){
-            return ReturnableResponse::fromIncorrectFormattedParam('access_token');
-        }
-        if(empty($REQ_UID) || $REQ_UID < 0){
-            return ReturnableResponse::fromIncorrectFormattedParam('uid');
-        }else{
-            $REQ_UID = (int) $REQ_UID;
-        }
-        $TokenEntityStorage = PDK2021Wrapper::$pdkCore->getTokenEntityStorage();
-        $TokenEntity = $TokenEntityStorage->getTokenEntity($REQ_ACCESS_TOKEN);
-        if($TokenEntity === null){
-            return ReturnableResponse::fromCredentialMismatchError('access_token');
-        }
-        if($TokenEntity->getRelatedUID() !== $REQ_UID){
-            return ReturnableResponse::fromCredentialMismatchError('access_token');
-        }
-        if(!$TokenEntity->isValid($ctime)){
-            return ReturnableResponse::fromItemExpiredOrUsedError('access_token');
-        }
-        return null;
     }
 }

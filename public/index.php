@@ -80,17 +80,23 @@ $errMiddleWare->setDefaultErrorHandler($customErrorHandler);
 
 
 $app->post('/user',RegisterController::class . ':register');
+
 $app->post('/user/token',LoginController::class . ':login');
 $app->get('/user/{uid}/token/{access_token}/checkTokenResult',LoginController::class . ':checkTokenValid');
 $app->get('/user/{uid}/token/refreshResult',LoginController::class . ':refreshToken');
 $app->delete('/user/{uid}/token/{access_token}',LoginController::class . ':logout');
+
 $app->get('/vericodes/verifyEmailResult/{veriCode}',VeriCodeController::class . ':verifyEmail');
 $app->get('/vericodes/verifyPhoneResult/{veriCode}',VeriCodeController::class . ':verifyPhone');
 $app->post('/vericodes/sendAnotherVerifyEmailRequest',VeriCodeController::class . ':requestVerificationEmailResend');
 $app->post('/vericodes/sendAnotherVerifyPhoneRequest',VeriCodeController::class . ':requestVerificationPhoneResend');
+
 $app->post('/vericodes/changeEmailAddrRequest',VeriCodeController::class . ':requestChangeEmailAddressVeriCode');
 $app->post('/vericodes/changePhoneNumberRequest',VeriCodeController::class . ':requestChangePhoneNumVeriCode');
 $app->patch('/user/email',LoggedInFunctionController::class . ':changeEmailAddress');
 $app->patch('/user/phoneNum',LoggedInFunctionController::class . ':changePhoneNumber');
+
+$app->post('/vericodes/changePasswordRequest',VeriCodeController::class . ':requestChangePassword');
+$app->patch('/user/password',VeriCodeController::class . ':changePassword');
 
 $app->run();
