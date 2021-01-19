@@ -269,8 +269,15 @@ class VeriCodeController{
     public function requestVerificationPhoneResend(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
         $REQ_PARAMS = json_decode($request->getBody(),true);
         $REQ_PHONE = $REQ_PARAMS['phone'];
+        $REQ_PREFER_SEND_METHOD = $REQ_PARAMS['preferred_send_method'];
         $REMOTE_ADDR = $request->getAttribute('ip');
         $ctime = time();
+
+        if(empty($REQ_PREFER_SEND_METHOD) || $REQ_PREFER_SEND_METHOD == SentMethod::EMAIL || $REQ_PREFER_SEND_METHOD == SentMethod::NOT_SENT || !SentMethod::isSentMethodValid($REQ_PREFER_SEND_METHOD)){
+            $REQ_PREFER_SEND_METHOD = SentMethod::SMS_MESSAGE;
+        }else{
+            $REQ_PREFER_SEND_METHOD = (int) $REQ_PREFER_SEND_METHOD;
+        }
 
         $userEntityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();
         $userSystemConfig = $userEntityStorage->getFormatSetting();
@@ -299,7 +306,7 @@ class VeriCodeController{
             PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
             $methodReceiver,
             $REMOTE_ADDR,
-            true
+            $REQ_PREFER_SEND_METHOD !== SentMethod::PHONE_CALL
         );
         if($optionalException !== null){
             return ReturnableResponse::fromPDKException($optionalException)->toResponse($response);

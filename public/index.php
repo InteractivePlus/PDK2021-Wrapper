@@ -99,4 +99,6 @@ $app->patch('/user/phoneNum',LoggedInFunctionController::class . ':changePhoneNu
 $app->post('/vericodes/changePasswordRequest',VeriCodeController::class . ':requestChangePassword');
 $app->patch('/user/password',VeriCodeController::class . ':changePassword');
 
+$app->patch('/user/userInfo',LoggedInFunctionController::class . ':changeUserInfo');
+
 $app->run();

@@ -3,6 +3,7 @@ namespace InteractivePlus\PDK2021\Controllers\UserSystem;
 
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\VeriCode\VeriCodeController;
+use InteractivePlus\PDK2021\OutputUtils\UserOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerArgumentError;
@@ -13,6 +14,7 @@ use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeEntity;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeID;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeIDs;
 use InteractivePlus\PDK2021Core\User\Formats\UserPhoneUtil;
+use InteractivePlus\PDK2021Core\User\UserSystemFormatSetting;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -187,5 +189,78 @@ class LoggedInFunctionController{
         $result = new ReturnableResponse(200,0);
         $result->returnDataLevelEntries['sent_method'] = $methodReceiver;
         return $result->toResponse($response);
+    }
+    public function changeUserInfo(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = json_decode($request->getBody(),true);
+        $changeNickname = false;
+        $changeSignature = false;
+        $REQ_NICKNAME = null;
+        $REQ_SIGNATURE = null;
+        $REQ_UID = $REQ_PARAMS['uid'];
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+
+        $ctime = time();
+
+        if(isset($REQ_PARAMS['nickname'])){
+            $REQ_NICKNAME = $REQ_PARAMS['nickname'];
+            $changeNickname = true;
+        }
+        if(isset($REQ_PARAMS['signature'])){
+            $REQ_SIGNATURE = $REQ_PARAMS['signature'];
+            $changeSignature = true;
+        }
+        if(!$changeNickname && !$changeSignature){
+            return ReturnableResponse::fromIncorrectFormattedParam('nickname|signature')->toResponse($response);
+        }
+        
+        $UserEntityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();
+        $UserSystemFormatConfig = $UserEntityStorage->getFormatSetting();
+
+        if($changeNickname && $REQ_NICKNAME !== null && (!is_string($REQ_NICKNAME) || !$UserSystemFormatConfig->checkNickName($REQ_NICKNAME))){
+            return ReturnableResponse::fromIncorrectFormattedParam('nickname')->toResponse($response);
+        }
+        if($changeSignature && $REQ_SIGNATURE !== null && (!is_string($REQ_SIGNATURE) || !$UserSystemFormatConfig->checkSignature($REQ_SIGNATURE))){
+            return ReturnableResponse::fromIncorrectFormattedParam('signature')->toResponse($response);
+        }
+
+        //check if user credential is valid
+        $credentialCheckResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        if($credentialCheckResponse !== null){
+            return $credentialCheckResponse->toResponse($response);
+        }
+
+        //Find User Entity and Edit
+        $UserEntity = null;
+        try{
+            $UserEntity = $UserEntityStorage->getUserEntityByUID((int) $REQ_UID);
+            if($UserEntity === null){
+                return ReturnableResponse::fromInnerError('could not find user entity with a valid access token')->toResponse($response);
+            }
+        }catch(PDKStorageEngineError $e){
+            return ReturnableResponse::fromPDKException($e)->toResponse($response);
+        }
+
+        $nicknameCheckUID = $UserEntityStorage->checkNicknameExist($REQ_NICKNAME);
+        if($nicknameCheckUID !== $UserEntity->getUID() && $nicknameCheckUID !== -1){
+            return ReturnableResponse::fromItemAlreadyExist('nickname');
+        }
+        
+        if($changeNickname){
+            $UserEntity->setNickName($REQ_NICKNAME);
+        }
+        if($changeSignature){
+            $UserEntity->setSignature($REQ_SIGNATURE);
+        }
+
+        //Update User Entity
+        try{
+            $UserEntityStorage->updateUserEntity($UserEntity);
+        }catch(PDKStorageEngineError $e){
+            return ReturnableResponse::fromPDKException($e)->toResponse($response);
+        }
+
+        $finalResponse = new ReturnableResponse(200,0);
+        $finalResponse->returnDataLevelEntries['user'] = UserOutputUtil::getUserEntityAsAssocArray($UserEntity);
+        return $finalResponse->toResponse($response);
     }
 }

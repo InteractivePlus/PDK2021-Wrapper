@@ -8,6 +8,7 @@ class UserOutputUtil{
     public static function getUserEntityAsAssocArray(UserEntity $userEntity) : array{
         return array(
             "uid" => $userEntity->getUID(),
+            "username"=>$userEntity->getUsername(),
             "nickname" => $userEntity->getNickName(),
             "signature" => $userEntity->getSignature(),
             "email" => $userEntity->getEmail(),
