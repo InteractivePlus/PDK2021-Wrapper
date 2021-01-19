@@ -11,7 +11,7 @@ class LocalFileSMSServiceProvider extends ConsoleSMSServiceProvider{
     }
     public function sendSMS(PhoneNumber $numberToReceive, string $content, bool $enableSMSSplit) : bool{
         $assocArr = parent::toAssocArr($numberToReceive,$content);
-        $previousContent = file_exists($this->_filename) ? file_get_contents($this->_filename) . '\r\n' : '';
+        $previousContent = file_exists($this->_filename) ? file_get_contents($this->_filename) . "\r\n" : '';
         file_put_contents($this->_filename,$previousContent . json_encode($assocArr));
         return true;
     }

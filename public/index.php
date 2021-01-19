@@ -89,6 +89,8 @@ $app->get('/vericodes/verifyPhoneResult/{veriCode}',VeriCodeController::class . 
 $app->post('/vericodes/sendAnotherVerifyEmailRequest',VeriCodeController::class . ':requestVerificationEmailResend');
 $app->post('/vericodes/sendAnotherVerifyPhoneRequest',VeriCodeController::class . ':requestVerificationPhoneResend');
 $app->post('/vericodes/changeEmailAddrRequest',VeriCodeController::class . ':requestChangeEmailAddressVeriCode');
+$app->post('/vericodes/changePhoneNumberRequest',VeriCodeController::class . ':requestChangePhoneNumVeriCode');
 $app->patch('/user/email',LoggedInFunctionController::class . ':changeEmailAddress');
+$app->patch('/user/phoneNum',LoggedInFunctionController::class . ':changePhoneNumber');
 
 $app->run();

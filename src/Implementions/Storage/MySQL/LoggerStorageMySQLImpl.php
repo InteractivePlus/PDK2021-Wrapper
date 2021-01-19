@@ -91,8 +91,8 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
     protected function LogEntityFromDataRow(array $dataRow) : LogEntity{
         $newEntity = new LogEntity(
             $dataRow['action_id'],
-            empty($dataRow['app_uid']) ? APPSystemConstants::NO_APP_RELATED_APPUID : $dataRow['app_uid'],
-            empty($dataRow['user_uid']) ? UserSystemConstants::NO_USER_RELATED_UID : $dataRow['user_uid'],
+            !isset($dataRow['app_uid']) ? APPSystemConstants::NO_APP_RELATED_APPUID : $dataRow['app_uid'],
+            !isset($dataRow['user_uid']) ? UserSystemConstants::NO_USER_RELATED_UID : $dataRow['user_uid'],
             $dataRow['log_time'],
             $dataRow['log_level'],
             $dataRow['operation_success'] == 1,

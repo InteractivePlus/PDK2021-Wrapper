@@ -42,6 +42,7 @@ class VeriCodeController{
             return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
         }
         if($veriCodeEntity->getAPPUID() != $appuid){
+            print "appuid incorrect : " . $veriCodeEntity->getAPPUID();
             return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
         }
         return new CheckVericodeResponse(true,null,$veriCodeEntity);
@@ -423,8 +424,137 @@ class VeriCodeController{
         }
 
         $returnResult = new ReturnableResponse(201,0);
+        $returnResult->returnDataLevelEntries['sent_method'] = $actualSendingMethod;
         return $returnResult->toResponse($response);
     }
     
-    
+    public function requestChangePhoneNumVeriCode(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = json_decode($request->getBody(),true);
+        $REQ_UID = $REQ_PARAMS['uid'];
+        $REQ_NEW_PHONE = $REQ_PARAMS['new_phone'];
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+        $REQ_PREF_SEND_METHOD = $REQ_PARAMS['preferred_send_method'];
+
+        $ctime = time();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+        
+        $UserEntityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();
+        $UserSystemFormatConfig = $UserEntityStorage->getFormatSetting();
+        $VeriCodeEntityStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
+
+        if(empty($REQ_NEW_PHONE) || !is_string($REQ_NEW_PHONE)){
+            return ReturnableResponse::fromIncorrectFormattedParam('new_phone')->toResponse($response);
+        }
+        $parsedNewPhone = null;
+        try{
+            $parsedNewPhone = UserPhoneUtil::parsePhone($REQ_NEW_PHONE);
+        }catch(PDKInnerArgumentError $e){
+            return ReturnableResponse::fromIncorrectFormattedParam('new_phone')->toResponse($response);
+        }
+        if(!UserPhoneUtil::verifyPhoneNumberObj($parsedNewPhone)){
+            return ReturnableResponse::fromIncorrectFormattedParam('new_phone')->toResponse($response);
+        }
+        if(empty($REQ_UID) || $REQ_UID < 0){
+            return ReturnableResponse::fromIncorrectFormattedParam('uid')->toResponse($response);
+        }else{
+            $REQ_UID = (int) $REQ_UID;
+        }
+        if(empty($REQ_PREF_SEND_METHOD) || $REQ_PREF_SEND_METHOD == SentMethod::NOT_SENT || !SentMethod::isSentMethodValid((int) $REQ_PREF_SEND_METHOD)){
+            $REQ_PREF_SEND_METHOD = SentMethod::SMS_MESSAGE;
+        }else{
+            $REQ_PREF_SEND_METHOD = (int) $REQ_PREF_SEND_METHOD;
+        }
+
+        //check token entity
+        $tokenCheckResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        if($tokenCheckResponse !== null){
+            return $tokenCheckResponse->toResponse($response);
+        }
+        
+        //check if user phone is set or not
+        $UserEntity = null;
+        try{
+            $UserEntity = $UserEntityStorage->getUserEntityByUID($REQ_UID);
+        }catch(PDKStorageEngineError $e){
+            return ReturnableResponse::fromPDKException($e)->toResponse($response);
+        }
+        if($UserEntity === null){
+            return ReturnableResponse::fromInnerError('A user entity with valid token could not be found in the database')->toResponse($response);
+        }
+        if($UserEntity->getPhoneNumber() === null){
+            return ReturnableResponse::fromPermissionDeniedError('Why would you request a swap-phone-number verification code if you don\'t even need one?')->toResponse($response);
+        }
+
+        //check if the phone number conflicts with any existing user
+        //we don't even have to check if the existing phone number = new phone addr because we are not comparing the user having the new phone with the current user, but comparing the uid having the phone with -1.
+        if($UserEntityStorage->checkPhoneNumExist($parsedNewPhone) !== -1){
+            return ReturnableResponse::fromItemAlreadyExist('new_phone')->toResponse($response);
+        }
+
+        //determine which method to send
+        $actualSendingMethod = SentMethod::NOT_SENT;
+        $veriCode = null;
+        if(($REQ_PREF_SEND_METHOD === SentMethod::EMAIL && !empty($UserEntity->getEmail()) && $UserEntity->isEmailVerified()) || ($REQ_PREF_SEND_METHOD !== SentMethod::EMAIL && ($UserEntity->getPhoneNumber() === null || !$UserEntity->isPhoneVerified()))){
+            $actualSendingMethod = SentMethod::EMAIL;
+            $veriCode = new VeriCodeEntity(
+                VeriCodeIDs::VERICODE_CHANGE_PHONE(),
+                $ctime,
+                $ctime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
+                $UserEntity->getUID(),
+                APPSystemConstants::INTERACTIVEPDK_APPUID,
+                array(
+                    'new_phone' => UserPhoneUtil::outputPhoneNumberE164($parsedNewPhone)
+                ),
+                $REMOTE_ADDR
+            );
+            while($VeriCodeEntityStorage->checkVeriCodeExist($veriCode->getVeriCodeString())){
+                $veriCode = $veriCode->withVeriCodeStringReroll();
+            }
+            try{
+                PDK2021Wrapper::$pdkCore->getVeriCodeEmailSender()->sendVeriCode($veriCode,$UserEntity,$UserEntity->getEmail());
+            }catch(PDKSenderServiceError $e){
+                return ReturnableResponse::fromPDKException($e)->toResponse($response);
+            }
+        }else if($UserEntity->getPhoneNumber() !== null && $UserEntity->isPhoneVerified()){
+            $veriCode = new VeriCodeEntity(
+                VeriCodeIDs::VERICODE_CHANGE_PHONE(),
+                $ctime,
+                $ctime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
+                $UserEntity->getUID(),
+                APPSystemConstants::INTERACTIVEPDK_APPUID,
+                array(
+                    'new_phone' => UserPhoneUtil::outputPhoneNumberE164($parsedNewPhone)
+                ),
+                $REMOTE_ADDR
+            );
+            while($VeriCodeEntityStorage->checkVeriCodeExist($veriCode->getVeriCodeString())){
+                $veriCode = $veriCode->withVeriCodeStringReroll();
+            }
+            $sender = PDK2021Wrapper::$pdkCore->getPhoneSender($actualSendingMethod,$REQ_PREF_SEND_METHOD !== SentMethod::PHONE_CALL);
+            try{
+                $sender->sendVeriCode($veriCode,$UserEntity,$UserEntity->getPhoneNumber());
+            }catch(PDKSenderServiceError $e){
+                return ReturnableResponse::fromPDKException($e)->toResponse($response);
+            }
+        }else{
+            return ReturnableResponse::fromItemNotFound('communication_method')->toResponse($response);
+        }
+        if($veriCode === null){
+            return ReturnableResponse::fromInnerError('allocated vericode disappeared')->toResponse($response);
+        }
+        $veriCode = $veriCode->withSentMethod($actualSendingMethod);
+        $updatedEntity = null;
+        try{
+            $updatedEntity = $VeriCodeEntityStorage->addVeriCodeEntity($veriCode,false);
+        }catch(PDKStorageEngineError $e){
+            return ReturnableResponse::fromPDKException($e)->toResponse($response);
+        }
+        if($updatedEntity === null){
+            return ReturnableResponse::fromInnerError('failed to add vericode to database')->toResponse($response);
+        }
+
+        $returnResult = new ReturnableResponse(201,0);
+        $returnResult->returnDataLevelEntries['sent_method'] = $actualSendingMethod;
+        return $returnResult->toResponse($response);
+    }
 }
