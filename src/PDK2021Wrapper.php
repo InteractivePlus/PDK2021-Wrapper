@@ -1,6 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021;
 
+use InteractivePlus\PDK2021\Implementions\Sender\AliyunServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Sender\LocalFileSMSServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Sender\SendGridEmailServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
@@ -26,8 +27,10 @@ class PDK2021Wrapper{
         $UserEntityStorage = new UserEntityStorageMySQLImpl($mySQLConn,$config->USER_SYSTEM_CONSTRAINTS);
         $TokenEntityStorage = new TokenEntityStorageMySQLImpl($mySQLConn);
         $EmailSender = new VeriCodeEmailSenderImplWithProvider(
-            new SendGridEmailServiceProvider($config->SENDGRID_APIKEY,$config->SENDGRID_FROM_ADDR,$config->SENDGRID_FROM_NAME),
-            new EmailContentProvider()
+            new AliyunServiceProvider($config->ALIYUN_ACCESS_KEY_ID,$config->ALIYUN_ACCESS_KEY_SECRET),
+            new EmailContentProvider(),
+            $config->ALIYUN_FROM_NAME,
+            $config->ALIYUN_FROM_ADDR
         );
         $SMSSender = new VeriCodeSMSSenderImplWithService(
             new LocalFileSMSServiceProvider(__DIR__ . '/../LocalFileServiceProvider/SMS.json'),
