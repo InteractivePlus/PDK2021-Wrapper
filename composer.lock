@@ -967,16 +967,16 @@
         },
         {
             "name": "interactiveplus/lib-i18n",
-            "version": "0.0.1",
+            "version": "0.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/lib-i18n.git",
-                "reference": "e040fb13f0a8d9f5ef43a46dd419a34c22d3f3d7"
+                "reference": "3f6ef28c6557c42e19fe5ce4e63fb589977b7044"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/lib-i18n/zipball/e040fb13f0a8d9f5ef43a46dd419a34c22d3f3d7",
-                "reference": "e040fb13f0a8d9f5ef43a46dd419a34c22d3f3d7",
+                "url": "https://api.github.com/repos/InteractivePlus/lib-i18n/zipball/3f6ef28c6557c42e19fe5ce4e63fb589977b7044",
+                "reference": "3f6ef28c6557c42e19fe5ce4e63fb589977b7044",
                 "shasum": ""
             },
             "require": {
@@ -999,9 +999,9 @@
             "description": "A Library for Internationalization Support in PHP",
             "support": {
                 "issues": "https://github.com/InteractivePlus/lib-i18n/issues",
-                "source": "https://github.com/InteractivePlus/lib-i18n/tree/0.0.1"
+                "source": "https://github.com/InteractivePlus/lib-i18n/tree/0.0.2"
             },
-            "time": "2020-09-15T04:53:47+00:00"
+            "time": "2021-01-20T09:52:45+00:00"
         },
         {
             "name": "interactiveplus/pdk-2021-corelib",
@@ -1009,12 +1009,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "51ba3f831df553c07b2872a1a22cb01314bfe492"
+                "reference": "28c800ac69c60df7ecd35fb684f07575b85a79ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/51ba3f831df553c07b2872a1a22cb01314bfe492",
-                "reference": "51ba3f831df553c07b2872a1a22cb01314bfe492",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/28c800ac69c60df7ecd35fb684f07575b85a79ad",
+                "reference": "28c800ac69c60df7ecd35fb684f07575b85a79ad",
                 "shasum": ""
             },
             "require": {
@@ -1043,7 +1043,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-01-19T06:27:24+00:00"
+            "time": "2021-01-20T09:51:12+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",

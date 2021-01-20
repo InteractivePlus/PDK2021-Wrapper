@@ -1,17 +1,19 @@
 <?php
 namespace InteractivePlus\PDK2021;
 
+
 use InteractivePlus\PDK2021\Implementions\Sender\AliyunServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Sender\LocalFileSMSServiceProvider;
-use InteractivePlus\PDK2021\Implementions\Sender\SendGridEmailServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\TokenEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\UserEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\VeriCodeStorageMySQLImpl;
+use InteractivePlus\PDK2021\Implementions\TemplateProvider\WrapperEmailContent as TemplateProviderWrapperEmailContent;
+use InteractivePlus\PDK2021Core\Communication\CommunicationContents\Implementions\EmailTemplateContent\TemplateEmailContentGenerator;
 use InteractivePlus\PDK2021Core\Communication\VeriSender\Implementions\VeriCodeEmailSenderImplWithProvider;
 use InteractivePlus\PDK2021Core\Communication\VeriSender\Implementions\VeriCodeSMSSenderImplWithService;
 use InteractivePlus\PDK2021Core\PDKCore;
-use InteractivePlus\PDK2021Core\User\UserInfo\UserEntity;
+
 use MysqliDb;
 
 class PDK2021Wrapper{
@@ -28,7 +30,7 @@ class PDK2021Wrapper{
         $TokenEntityStorage = new TokenEntityStorageMySQLImpl($mySQLConn);
         $EmailSender = new VeriCodeEmailSenderImplWithProvider(
             new AliyunServiceProvider($config->ALIYUN_ACCESS_KEY_ID,$config->ALIYUN_ACCESS_KEY_SECRET),
-            new EmailContentProvider(),
+            new TemplateEmailContentGenerator(new TemplateProviderWrapperEmailContent(),new LinkProvider(),'InteractivePDK'),
             $config->ALIYUN_FROM_NAME,
             $config->ALIYUN_FROM_ADDR
         );
