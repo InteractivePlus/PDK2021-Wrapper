@@ -1,5 +1,6 @@
 <?php
 
+use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
@@ -78,6 +79,8 @@ $customErrorHandler = function(
 
 $errMiddleWare->setDefaultErrorHandler($customErrorHandler);
 
+$app->get('/captcha',SimpleCaptchaController::class . ':getSimpleCaptcha');
+$app->get('/captcha/{captcha_id}/submitResult',SimpleCaptchaController::class . ':getSimpleCaptchaSubmitResult');
 
 $app->post('/user',RegisterController::class . ':register');
 

@@ -5,10 +5,12 @@ namespace InteractivePlus\PDK2021;
 use InteractivePlus\PDK2021\Implementions\Sender\AliyunServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Sender\LocalFileSMSServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
+use InteractivePlus\PDK2021\Implementions\Storage\MySQL\SimpleCaptchaStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\TokenEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\UserEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\VeriCodeStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\TemplateProvider\WrapperEmailContent as TemplateProviderWrapperEmailContent;
+use InteractivePlus\PDK2021Core\Captcha\Implemention\PDKSimpleCaptchaSystemImpl;
 use InteractivePlus\PDK2021Core\Communication\CommunicationContents\Implementions\EmailTemplateContent\TemplateEmailContentGenerator;
 use InteractivePlus\PDK2021Core\Communication\VeriSender\Implementions\VeriCodeEmailSenderImplWithProvider;
 use InteractivePlus\PDK2021Core\Communication\VeriSender\Implementions\VeriCodeSMSSenderImplWithService;
@@ -39,6 +41,9 @@ class PDK2021Wrapper{
             new SMSContentProvider,
             ' 【形随意动用户系统团队】'
         );
+
+        $captchaSystem = new PDKSimpleCaptchaSystemImpl($config->CAPTCHA_AVAILABLE_DURATION,new SimpleCaptchaStorageMySQLImpl($mySQLConn,$config->CAPTCHA_PHRASE_LEN));
+
         self::$pdkCore = new PDKCore(
             $LoggerStorage,
             $VeriCodeStorage,
@@ -46,7 +51,8 @@ class PDK2021Wrapper{
             $SMSSender,
             null,
             $UserEntityStorage,
-            $TokenEntityStorage
+            $TokenEntityStorage,
+            $captchaSystem
         );
     }
     public static function installDB() : void{
@@ -58,10 +64,12 @@ class PDK2021Wrapper{
         $VeriCodeStorage = new VeriCodeStorageMySQLImpl($mySQLConn);
         $UserEntityStorage = new UserEntityStorageMySQLImpl($mySQLConn,$config->USER_SYSTEM_CONSTRAINTS);
         $TokenEntityStorage = new TokenEntityStorageMySQLImpl($mySQLConn);
+        $SimpleCaptchaStorage = new SimpleCaptchaStorageMySQLImpl($mySQLConn,$config->CAPTCHA_PHRASE_LEN);
         $LoggerStorage->createTables();
         $VeriCodeStorage->createTables();
         $UserEntityStorage->createTables();
         $TokenEntityStorage->createTables();
+        $SimpleCaptchaStorage->createTables();
         $mySQLConn->disconnect();
     }
 }

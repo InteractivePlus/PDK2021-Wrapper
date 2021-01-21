@@ -1,6 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021\Controllers\UserSystem;
 
+use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\OutputUtils\UserOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
@@ -74,6 +75,13 @@ class LoginController{
                 return ReturnableResponse::fromIncorrectFormattedParam('phone')->toResponse($response);
             }
         }
+
+        $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
+        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        if($captchaResponse !== null){
+            return $captchaResponse->toResponse($response);
+        }
+
         $userEntity = null;
         $loginMethod = '';
         if(!empty($REQ_USERNAME)){

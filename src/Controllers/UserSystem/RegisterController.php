@@ -1,6 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021\Controllers\UserSystem;
 
+use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
@@ -52,6 +53,12 @@ class RegisterController{
             }catch(PDKInnerArgumentError $e){
                 return ReturnableResponse::fromIncorrectFormattedParam('phone')->toResponse($response);
             }
+        }
+
+        $REQ_CAPTCHA_ID = $requestParams['captcha_id'];
+        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        if($captchaResponse !== null){
+            return $captchaResponse->toResponse($response);
         }
 
         $entityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();

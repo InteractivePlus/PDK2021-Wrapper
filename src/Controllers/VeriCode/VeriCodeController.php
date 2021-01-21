@@ -1,6 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021\Controllers\VeriCode;
 
+use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\CheckVericodeResponse;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
@@ -46,7 +47,6 @@ class VeriCodeController{
             return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
         }
         if($veriCodeEntity->getAPPUID() != $appuid){
-            print "appuid incorrect : " . $veriCodeEntity->getAPPUID();
             return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
         }
         return new CheckVericodeResponse(true,null,$veriCodeEntity);
@@ -246,6 +246,13 @@ class VeriCodeController{
         if(!$userSystemConfig->checkEmailAddr($REQ_EMAIL)){
             return ReturnableResponse::fromIncorrectFormattedParam('email')->toResponse($response);
         }
+
+        $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
+        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        if($captchaResponse !== null){
+            return $captchaResponse->toResponse($response);
+        }
+
         $userEntity = $userEntityStorage->getUserEntityByEmail($REQ_EMAIL);
         if($userEntity === null){
             return ReturnableResponse::fromItemNotFound('email')->toResponse($response);
@@ -253,6 +260,8 @@ class VeriCodeController{
         if($userEntity->isEmailVerified()){
             return ReturnableResponse::fromItemAlreadyExist('email')->toResponse($response);
         }
+
+
         $optionalException = PDK2021Wrapper::$pdkCore->createAndSendVerificationEmail(
             $userEntity->getEmail(),
             $userEntity,
@@ -277,6 +286,12 @@ class VeriCodeController{
             $REQ_PREFER_SEND_METHOD = SentMethod::SMS_MESSAGE;
         }else{
             $REQ_PREFER_SEND_METHOD = (int) $REQ_PREFER_SEND_METHOD;
+        }
+
+        $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
+        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        if($captchaResponse !== null){
+            return $captchaResponse->toResponse($response);
         }
 
         $userEntityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();
@@ -570,6 +585,11 @@ class VeriCodeController{
                 return ReturnableResponse::fromPDKException($e)->toResponse($response);
             }
         }else{
+            $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
+            $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+            if($captchaResponse !== null){
+                return $captchaResponse->toResponse($response);
+            }
             if(!empty($REQ_FORGOT_PWD_EMAIL)){
                 if(!is_string($REQ_FORGOT_PWD_EMAIL) || !$UserSystemFormatConfig->checkEmailAddr($REQ_FORGOT_PWD_EMAIL)){
                     return ReturnableResponse::fromIncorrectFormattedParam('email')->toResponse($response);

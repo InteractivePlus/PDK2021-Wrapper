@@ -24,6 +24,9 @@ class Config{
     public int $TOKEN_AVAILABLE_DURATION = 3600 * 24 * 1;
     public int $REFRESH_TOKEN_AVAILABLE_DURATION = 3600 * 24 * 10;
 
+    public int $CAPTCHA_AVAILABLE_DURATION = 60 * 5;
+    public int $CAPTCHA_PHRASE_LEN = 5;
+
     public bool $DEVELOPMENT_MODE = true;
     public function __construct()
     {
