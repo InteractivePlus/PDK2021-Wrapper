@@ -203,16 +203,16 @@
         },
         {
             "name": "alibabacloud/sdk",
-            "version": "1.8.813",
+            "version": "1.8.814",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aliyun/openapi-sdk-php.git",
-                "reference": "ac319e71af5bca31977d7240eba34f2f6fb52e38"
+                "reference": "56b8c6b32f2342d3127c61f3d311dd4f0cec4d16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/ac319e71af5bca31977d7240eba34f2f6fb52e38",
-                "reference": "ac319e71af5bca31977d7240eba34f2f6fb52e38",
+                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/56b8c6b32f2342d3127c61f3d311dd4f0cec4d16",
+                "reference": "56b8c6b32f2342d3127c61f3d311dd4f0cec4d16",
                 "shasum": ""
             },
             "require": {
@@ -437,7 +437,7 @@
                 "issues": "https://github.com/aliyun/openapi-sdk-php/issues",
                 "source": "https://github.com/aliyun/openapi-sdk-php"
             },
-            "time": "2021-01-19T11:15:15+00:00"
+            "time": "2021-01-20T09:58:25+00:00"
         },
         {
             "name": "clagiordano/weblibs-configmanager",
@@ -967,16 +967,16 @@
         },
         {
             "name": "interactiveplus/lib-i18n",
-            "version": "0.0.2",
+            "version": "0.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/lib-i18n.git",
-                "reference": "3f6ef28c6557c42e19fe5ce4e63fb589977b7044"
+                "reference": "7963a87a0dcba83c667de01938e20335581bfbd0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/lib-i18n/zipball/3f6ef28c6557c42e19fe5ce4e63fb589977b7044",
-                "reference": "3f6ef28c6557c42e19fe5ce4e63fb589977b7044",
+                "url": "https://api.github.com/repos/InteractivePlus/lib-i18n/zipball/7963a87a0dcba83c667de01938e20335581bfbd0",
+                "reference": "7963a87a0dcba83c667de01938e20335581bfbd0",
                 "shasum": ""
             },
             "require": {
@@ -999,9 +999,9 @@
             "description": "A Library for Internationalization Support in PHP",
             "support": {
                 "issues": "https://github.com/InteractivePlus/lib-i18n/issues",
-                "source": "https://github.com/InteractivePlus/lib-i18n/tree/0.0.2"
+                "source": "https://github.com/InteractivePlus/lib-i18n/tree/0.0.3"
             },
-            "time": "2021-01-20T09:52:45+00:00"
+            "time": "2021-01-20T10:00:53+00:00"
         },
         {
             "name": "interactiveplus/pdk-2021-corelib",
@@ -1009,12 +1009,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "28c800ac69c60df7ecd35fb684f07575b85a79ad"
+                "reference": "e780c7197ba2e0feb869b7c018b00edfd43d4cb9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/28c800ac69c60df7ecd35fb684f07575b85a79ad",
-                "reference": "28c800ac69c60df7ecd35fb684f07575b85a79ad",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/e780c7197ba2e0feb869b7c018b00edfd43d4cb9",
+                "reference": "e780c7197ba2e0feb869b7c018b00edfd43d4cb9",
                 "shasum": ""
             },
             "require": {
@@ -1043,7 +1043,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-01-20T09:51:12+00:00"
+            "time": "2021-01-20T10:47:09+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",

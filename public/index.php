@@ -32,7 +32,7 @@ $app = AppFactory::create();
 
 $app->addRoutingMiddleware();
 
-$errMiddleWare = $app->addErrorMiddleware(true,true,true,PDK2021Wrapper::$pdkCore->getLogger());
+$errMiddleWare = $app->addErrorMiddleware(PDK2021Wrapper::$config->DEVELOPMENT_MODE,true,true,PDK2021Wrapper::$pdkCore->getLogger());
 
 $app->addMiddleware(new RKA\Middleware\IpAddress(PDK2021Wrapper::$config->SLIM_CHECK_PROXY,PDK2021Wrapper::$config->SLIM_PROXY_IPS,'ip'));
 
