@@ -85,6 +85,7 @@ class SimpleCaptchaStorageMySQLImpl implements PDKSimpleCaptchaSystemStorage, My
         if($row['verified'] == 1 && $row['used'] == 0){
             return true;
         }
+        return false;
     }
     public function useCpatcha(string $captchaID) : void{
         $updateArr = [

@@ -3,6 +3,8 @@ namespace InteractivePlus\PDK2021;
 
 
 use InteractivePlus\PDK2021\Implementions\Sender\AliyunServiceProvider;
+use InteractivePlus\PDK2021\Implementions\Sender\DXTonSMSServiceProvider\DXTonServiceProvider;
+use InteractivePlus\PDK2021\Implementions\Sender\DXTonSMSServiceProvider\DXTonTemplateContentProvider;
 use InteractivePlus\PDK2021\Implementions\Sender\LocalFileSMSServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\SimpleCaptchaStorageMySQLImpl;
@@ -37,9 +39,9 @@ class PDK2021Wrapper{
             $config->ALIYUN_FROM_ADDR
         );
         $SMSSender = new VeriCodeSMSSenderImplWithService(
-            new LocalFileSMSServiceProvider(__DIR__ . '/../LocalFileServiceProvider/SMS.json'),
-            new SMSContentProvider,
-            ' 【形随意动用户系统团队】'
+            new DXTonServiceProvider($config->DXTON_USERNAME,$config->DXTON_APISecret,'utf8',false),
+            new DXTonTemplateContentProvider,
+            null
         );
 
         $captchaSystem = new PDKSimpleCaptchaSystemImpl($config->CAPTCHA_AVAILABLE_DURATION,new SimpleCaptchaStorageMySQLImpl($mySQLConn,$config->CAPTCHA_PHRASE_LEN));

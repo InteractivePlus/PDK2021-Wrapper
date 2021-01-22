@@ -15,6 +15,9 @@ class Config{
     public string $ALIYUN_ACCESS_KEY_SECRET = '';
     public string $ALIYUN_FROM_ADDR = '';
     public string $ALIYUN_FROM_NAME = '';
+
+    public string $DXTON_USERNAME = '';
+    public string $DXTON_APISecret = '';
     
     public UserSystemFormatSettingImpl $USER_SYSTEM_CONSTRAINTS;
     public bool $SLIM_CHECK_PROXY = false;
