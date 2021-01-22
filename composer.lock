@@ -1066,12 +1066,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "302a77932e573bfe6175e14c600bb85994c0ab58"
+                "reference": "9be2c101e04782391db1ff8e5c522f4bd0d20482"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/302a77932e573bfe6175e14c600bb85994c0ab58",
-                "reference": "302a77932e573bfe6175e14c600bb85994c0ab58",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/9be2c101e04782391db1ff8e5c522f4bd0d20482",
+                "reference": "9be2c101e04782391db1ff8e5c522f4bd0d20482",
                 "shasum": ""
             },
             "require": {
@@ -1101,7 +1101,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-01-21T14:16:42+00:00"
+            "time": "2021-01-21T14:58:27+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
