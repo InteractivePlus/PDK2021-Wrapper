@@ -79,10 +79,8 @@ class AliyunServiceProvider extends EmailServiceProvider{
             }
             $request->request();
         }catch(ClientException $e){
-            var_dump($e);
             return false;
         }catch(ServerException $e){
-            var_dump($e);
             return false;
         }
         return true;
