@@ -1,37 +1,42 @@
 <?php
 namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenEntity;
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenEntityStorage;
+use InteractivePlus\PDK2021Core\APP\Format\APPFormat;
+use InteractivePlus\PDK2021Core\APP\Format\MaskIDFormat;
+use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
 use InteractivePlus\PDK2021Core\Base\DataOperations\MultipleResult;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineError;
-use InteractivePlus\PDK2021Core\Base\Formats\IPFormat;
-use InteractivePlus\PDK2021Core\User\Formats\TokenFormat;
-use InteractivePlus\PDK2021Core\User\Login\TokenEntity;
-use InteractivePlus\PDK2021Core\User\Login\TokenEntityStorage;
+
 use MysqliDb;
 
-class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLStorageImpl{
+class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLStorageImpl{
     private MysqliDb $db;
     public function __construct(MysqliDb $db)
     {
         $this->db = $db;
     }
     public function createTables() : void{
-        $ipMaxLen = IPFormat::IPV6_STR_MAX_LEN;
-        $tokenMaxLen = TokenFormat::getTokenStringLength();
+        $accessTokenLen = APPFormat::getAPPAccessTokenStringLength();
+        $refreshTokenLen = APPFormat::getAPPRefreshTokenStringLength();
+        $maskIDLen = MaskIDFormat::getMaskIDStringLength();
+
         $mysqli = $this->db->mysqli();
         
         $createResult = $mysqli->query(
-            "CREATE TABLE IF NOT EXISTS `login_infos` (
-                `related_uid` INT UNSIGNED NOT NULL,
-                `access_token` CHAR({$tokenMaxLen}) NOT NULL,
-                `refresh_token` CHAR({$tokenMaxLen}) NOT NULL,
+            "CREATE TABLE IF NOT EXISTS `oauth_tokens` (
+                `access_token` CHAR({$accessTokenLen}) NOT NULL,
+                `refresh_token` CHAR({$refreshTokenLen}) NOT NULL,
                 `issue_time` INT UNSIGNED NOT NULL,
                 `expire_time` INT UNSIGNED NOT NULL,
                 `last_renew_time` INT UNSIGNED NOT NULL,
                 `refresh_expire_time` INT UNSIGNED NOT NULL,
-                `remote_addr` VARCHAR({$ipMaxLen}),
-                `device_ua` TINYTEXT,
+                `mask_id` CHAR({$maskIDLen}) NOT NULL,
+                `appuid` INT UNSIGNED NOT NULL,
+                `obtained_method` INT UNSIGNED NOT NULL,
+                `scopes` TINYTEXT,
                 `valid` TINYINT(1) NOT NULL,
                 PRIMARY KEY ( `access_token`, `refresh_token` )
             )ENGINE=InnoDB CHARSET=utf8;"
@@ -44,7 +49,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         $mysqli = $this->db->mysqli();
         
         $deleteResult = $mysqli->query(
-            'TRUNCATE TABLE `login_infos`;'
+            'TRUNCATE TABLE `oauth_tokens`;'
         );
         if(!$deleteResult){
             throw new PDKStorageEngineError('Failed to clear table data',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
@@ -54,33 +59,42 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         $mysqli = $this->db->mysqli();
         
         $deleteResult = $mysqli->query(
-            'DROP TABLE `login_infos`;'
+            'DROP TABLE `oauth_tokens`;'
         );
         if(!$deleteResult){
             throw new PDKStorageEngineError('Failed to drop table',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }
-    protected function __addTokenEntity(TokenEntity $Token) : void{
+    protected function scopeArrayToScopeData(array $scope) : ?string{
+        return empty($scope) ? null : implode(' ',$scope);
+    }
+
+    protected function scopeDataToScopeArray(?string $data) : array{
+        return empty($data) ? array() : explode(' ',$data);
+    }
+
+    protected function __addAPPTokenEntity(APPTokenEntity $Token) : void{
         $dataToAdd = array(
-            'related_uid' => $Token->getRelatedUID(),
-            'access_token' => $Token->getTokenStr(),
-            'refresh_token' => $Token->getRefreshTokenStr(),
+            'access_token' => $Token->getAccessToken(),
+            'refresh_token' => $Token->getRefreshToken(),
             'issue_time' => $Token->issueTime,
             'expire_time' => $Token->expireTime,
-            'last_renew_time' => $Token->lastRenewTime,
-            'refresh_expire_time' => $Token->refreshTokenExpireTime,
-            'remote_addr' => $Token->getRemoteAddr(),
-            'device_ua' => $Token->getDeviceUA(),
+            'last_renew_time' => $Token->lastRefreshTime,
+            'refresh_expire_time' => $Token->refreshExpireTime,
+            'mask_id' => $Token->getMaskID(),
+            'appuid' => $Token->appuid,
+            'obtained_method' => $Token->getObtainedMethod(),
+            'scopes' => $this->scopeArrayToScopeData($Token->scopes),
             'valid' => $Token->valid ? 1 : 0
         );
-        $result = $this->db->insert('login_infos',$dataToAdd);
+        $result = $this->db->insert('oauth_tokens',$dataToAdd);
         if(!$result){
             throw new PDKStorageEngineError('failed to insert data into database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }
-    public function checkTokenExist(string $TokenString) : bool{
-        $this->db->where('access_token',$TokenString);
-        $count = $this->db->getValue('login_infos','count(*)');
+    public function checkAccessTokenExist(string $AccessTokenString) : bool{
+        $this->db->where('access_token',$AccessTokenString);
+        $count = $this->db->getValue('oauth_tokens','count(*)');
         if(!$count){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
@@ -88,75 +102,79 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
     }
     public function checkRefreshTokenExist(string $RefreshTokenString) : bool{
         $this->db->where('refresh_token',$RefreshTokenString);
-        $count = $this->db->getValue('login_infos','count(*)');
+        $count = $this->db->getValue('oauth_tokens','count(*)');
         if(!$count){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count >= 1;
     }
-    protected function getTokenEntityFromDatabaseRow(array $dataRow) : TokenEntity{
-        $newEntity = new TokenEntity(
-            $dataRow['related_uid'],
-            $dataRow['issue_time'],
-            $dataRow['expire_time'],
-            $dataRow['refresh_expire_time'],
-            $dataRow['last_renew_time'],
-            empty($dataRow['remote_addr']) ? null : $dataRow['remote_addr'],
-            empty($dataRow['device_ua']) ? null : $dataRow['device_ua'],
+    protected function getAPPTokenEntityFromDatabaseRow(array $dataRow) : APPTokenEntity{
+        $newEntity = new APPTokenEntity(
             $dataRow['access_token'],
             $dataRow['refresh_token'],
+            $dataRow['issue_time'],
+            $dataRow['expire_time'],
+            $dataRow['last_renew_time'],
+            $dataRow['refresh_expire_time'],
+            $dataRow['mask_id'],
+            $dataRow['appuid'],
+            $dataRow['obtained_method'],
+            $this->scopeDataToScopeArray($dataRow['scopes']),
             $dataRow['valid'] === 1
         );
         return $newEntity;
     }
-    public function getTokenEntity(string $TokenString) : ?TokenEntity{
-        $this->db->where('access_token',$TokenString);
-        $result = $this->db->getOne('login_infos');
+    public function getAPPTokenEntity(string $accessToken) : ?APPTokenEntity{
+        $this->db->where('access_token',$accessToken);
+        $result = $this->db->getOne('oauth_tokens');
         if(!$result){
             return null;
         }
-        return $this->getTokenEntityFromDatabaseRow($result);
+        return $this->getAPPTokenEntityFromDatabaseRow($result);
     }
-    public function getTokenEntitybyRefreshToken(string $refreshToken) : ?TokenEntity{
+    public function getAPPTokenEntitybyRefreshToken(string $refreshToken) : ?APPTokenEntity{
         $this->db->where('refresh_token',$refreshToken);
-        $result = $this->db->getOne('login_infos');
+        $result = $this->db->getOne('oauth_tokens');
         if(!$result){
             return null;
         }
-        return $this->getTokenEntityFromDatabaseRow($result);
+        return $this->getAPPTokenEntityFromDatabaseRow($result);
     }
 
-    public function updateTokenEntity(TokenEntity $Token) : bool{
+    public function updateAPPTokenEntity(APPTokenEntity $Token) : bool{
         $dataToUpdate = array(
+            'refresh_token' => $Token->getRefreshToken(),
             'issue_time' => $Token->issueTime,
             'expire_time' => $Token->expireTime,
-            'last_renew_time' => $Token->lastRenewTime,
-            'refresh_expire_time' => $Token->refreshTokenExpireTime,
-            'remote_addr' => $Token->getRemoteAddr(),
-            'device_ua' => $Token->getDeviceUA(),
+            'last_renew_time' => $Token->lastRefreshTime,
+            'refresh_expire_time' => $Token->refreshExpireTime,
+            'mask_id' => $Token->getMaskID(),
+            'appuid' => $Token->appuid,
+            'obtained_method' => $Token->getObtainedMethod(),
+            'scopes' => $this->scopeArrayToScopeData($Token->scopes),
             'valid' => $Token->valid ? 1 : 0
         );
-        $this->db->where('access_token',$Token->getTokenStr());
-        $result = $this->db->update('login_infos',$dataToUpdate);
+        $this->db->where('access_token',$Token->getAccessToken());
+        $result = $this->db->update('oauth_tokens',$dataToUpdate);
         if(!$result){
             throw new PDKStorageEngineError('failed to insert data into database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $this->db->count >= 1;
     }
     
-    public function setTokenEntityInvalid(string $TokenString) : void{
+    public function setAPPTokenEntityInvalid(string $TokenString) : void{
         $dataToUpdate = array(
             'valid' => 0
         );
         $this->db->where('access_token',$TokenString);
-        $result = $this->db->update('login_infos',$dataToUpdate);
+        $result = $this->db->update('oauth_tokens',$dataToUpdate);
         if(!$result){
             throw new PDKStorageEngineError('failed to insert data into database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return;
     }
 
-    public function searchToken(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, int $uid = UserSystemConstants::NO_USER_RELATED_UID) : MultipleResult{
+    public function searchAPPToken(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appid = APPSystemConstants::NO_APP_RELATED_APPUID, int $dataOffset = 0, int $dataLimit = -1) : MultipleResult{
         if($issueTimeMin > 0){
             $this->db->where('issue_time',$issueTimeMin,'>=');
         }
@@ -181,16 +199,19 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         if($refreshExpireMax >= 0){
             $this->db->where('refresh_expire_time',$refreshExpireMax,'<=');
         }
-        if($uid > 0){
-            $this->db->where('related_uid',$uid);
+        if(!empty($maskID)){
+            $this->db->where('mask_id','%' . $maskID . '%', 'LIKE');
         }
-        $result = $this->db->withTotalCount()->get('login_infos');
+        if($appid != APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('appuid',$appid);
+        }
+        $result = $this->db->withTotalCount()->get('oauth_tokens');
         if(!$result){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();
         foreach($result as $singleRow){
-            $resultObjArr[] = $this->getTokenEntityFromDatabaseRow($singleRow);
+            $resultObjArr[] = $this->getAPPTokenEntityFromDatabaseRow($singleRow);
         }
         return new MultipleResult(
             $this->db->count,
@@ -200,7 +221,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         );
     }
 
-    public function clearToken(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, int $uid = UserSystemConstants::NO_USER_RELATED_UID) : void{
+    public function clearAPPToken(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appid = APPSystemConstants::NO_APP_RELATED_APPUID) : void{
         if($issueTimeMin > 0){
             $this->db->where('issue_time',$issueTimeMin,'>=');
         }
@@ -225,16 +246,19 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         if($refreshExpireMax >= 0){
             $this->db->where('refresh_expire_time',$refreshExpireMax,'<=');
         }
-        if($uid > 0){
-            $this->db->where('related_uid',$uid);
+        if(!empty($maskID)){
+            $this->db->where('mask_id','%' . $maskID . '%', 'LIKE');
         }
-        $result = $this->db->delete('login_infos');
+        if($appid != APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('appuid',$appid);
+        }
+        $result = $this->db->delete('oauth_tokens');
         if(!$result){
             throw new PDKStorageEngineError('failed to delete from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }
     
-    public function getTokenCount(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, int $uid = UserSystemConstants::NO_USER_RELATED_UID) : int{
+    public function getAPPTokenCount(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appid = APPSystemConstants::NO_APP_RELATED_APPUID) : int{
         if($issueTimeMin > 0){
             $this->db->where('issue_time',$issueTimeMin,'>=');
         }
@@ -259,10 +283,13 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
         if($refreshExpireMax >= 0){
             $this->db->where('refresh_expire_time',$refreshExpireMax,'<=');
         }
-        if($uid > 0){
-            $this->db->where('related_uid',$uid);
+        if(!empty($maskID)){
+            $this->db->where('mask_id','%' . $maskID . '%', 'LIKE');
         }
-        $result = $this->db->getValue('login_infos','count(*)');
+        if($appid != APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('appuid',$appid);
+        }
+        $result = $this->db->getValue('oauth_tokens','count(*)');
         if(!$result){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }

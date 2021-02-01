@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d87d7f6ca7782d206d6b862faeae1a6",
+    "content-hash": "875997a3a95b23a3d551e6f6a962d0ae",
     "packages": [
         {
             "name": "adbario/php-dot-notation",
@@ -203,16 +203,16 @@
         },
         {
             "name": "alibabacloud/sdk",
-            "version": "1.8.817",
+            "version": "1.8.832",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aliyun/openapi-sdk-php.git",
-                "reference": "03f416c8a9b3bb634ab43884703839911d611299"
+                "reference": "c9bc1c08a170eabeef3e649af6892a87955c4051"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/03f416c8a9b3bb634ab43884703839911d611299",
-                "reference": "03f416c8a9b3bb634ab43884703839911d611299",
+                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/c9bc1c08a170eabeef3e649af6892a87955c4051",
+                "reference": "c9bc1c08a170eabeef3e649af6892a87955c4051",
                 "shasum": ""
             },
             "require": {
@@ -437,7 +437,7 @@
                 "issues": "https://github.com/aliyun/openapi-sdk-php/issues",
                 "source": "https://github.com/aliyun/openapi-sdk-php"
             },
-            "time": "2021-01-21T11:44:36+00:00"
+            "time": "2021-02-01T09:15:49+00:00"
         },
         {
             "name": "clagiordano/weblibs-configmanager",
@@ -609,16 +609,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.12.16",
+            "version": "8.12.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "d3d4ed9466249747249f3032717c4aebaaa8363e"
+                "reference": "d914436bd646e9d645e7f8ac6644bf7e33a023d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/d3d4ed9466249747249f3032717c4aebaaa8363e",
-                "reference": "d3d4ed9466249747249f3032717c4aebaaa8363e",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/d914436bd646e9d645e7f8ac6644bf7e33a023d4",
+                "reference": "d914436bd646e9d645e7f8ac6644bf7e33a023d4",
                 "shasum": ""
             },
             "require": {
@@ -678,7 +678,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2021-01-12T14:54:36+00:00"
+            "time": "2021-01-27T19:06:58+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -1024,16 +1024,16 @@
         },
         {
             "name": "interactiveplus/lib-i18n",
-            "version": "0.0.3",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/lib-i18n.git",
-                "reference": "7963a87a0dcba83c667de01938e20335581bfbd0"
+                "reference": "8e20ba691f3e3fa50c8d0e3d8ad2798e430668b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/lib-i18n/zipball/7963a87a0dcba83c667de01938e20335581bfbd0",
-                "reference": "7963a87a0dcba83c667de01938e20335581bfbd0",
+                "url": "https://api.github.com/repos/InteractivePlus/lib-i18n/zipball/8e20ba691f3e3fa50c8d0e3d8ad2798e430668b2",
+                "reference": "8e20ba691f3e3fa50c8d0e3d8ad2798e430668b2",
                 "shasum": ""
             },
             "require": {
@@ -1046,7 +1046,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "LibI18N\\": "src/"
+                    "InteractivePlus\\LibI18N\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1056,9 +1056,9 @@
             "description": "A Library for Internationalization Support in PHP",
             "support": {
                 "issues": "https://github.com/InteractivePlus/lib-i18n/issues",
-                "source": "https://github.com/InteractivePlus/lib-i18n/tree/0.0.3"
+                "source": "https://github.com/InteractivePlus/lib-i18n/tree/1.0.0"
             },
-            "time": "2021-01-20T10:00:53+00:00"
+            "time": "2021-01-23T04:15:00+00:00"
         },
         {
             "name": "interactiveplus/pdk-2021-corelib",
@@ -1066,18 +1066,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "9be2c101e04782391db1ff8e5c522f4bd0d20482"
+                "reference": "58a82db48e5696eb4405bda63aeffe603c02875b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/9be2c101e04782391db1ff8e5c522f4bd0d20482",
-                "reference": "9be2c101e04782391db1ff8e5c522f4bd0d20482",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/58a82db48e5696eb4405bda63aeffe603c02875b",
+                "reference": "58a82db48e5696eb4405bda63aeffe603c02875b",
                 "shasum": ""
             },
             "require": {
                 "giggsey/libphonenumber-for-php": "^8",
                 "gregwar/captcha": "^1.1",
-                "interactiveplus/lib-i18n": "~0.0",
+                "interactiveplus/lib-i18n": "~1.0",
                 "php": ">=7.4.0",
                 "phpmailer/phpmailer": "~6.1",
                 "psr/log": "~1.1"
@@ -1101,7 +1101,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-01-21T14:58:27+00:00"
+            "time": "2021-02-01T11:26:54+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -1777,16 +1777,16 @@
         },
         {
             "name": "sendgrid/sendgrid",
-            "version": "7.9.1",
+            "version": "7.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sendgrid/sendgrid-php.git",
-                "reference": "c3b76df9d2374b469474ab209fbd4e4ef1a16986"
+                "reference": "ab0023a6233f39e408b5eb8c4299f20790f5f5a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sendgrid/sendgrid-php/zipball/c3b76df9d2374b469474ab209fbd4e4ef1a16986",
-                "reference": "c3b76df9d2374b469474ab209fbd4e4ef1a16986",
+                "url": "https://api.github.com/repos/sendgrid/sendgrid-php/zipball/ab0023a6233f39e408b5eb8c4299f20790f5f5a7",
+                "reference": "ab0023a6233f39e408b5eb8c4299f20790f5f5a7",
                 "shasum": ""
             },
             "require": {
@@ -1836,9 +1836,9 @@
             ],
             "support": {
                 "issues": "https://github.com/sendgrid/sendgrid-php/issues",
-                "source": "https://github.com/sendgrid/sendgrid-php/tree/7.9.1"
+                "source": "https://github.com/sendgrid/sendgrid-php/tree/7.9.2"
             },
-            "time": "2020-11-18T22:24:22+00:00"
+            "time": "2021-01-27T20:19:06+00:00"
         },
         {
             "name": "slim/psr7",
@@ -2080,16 +2080,16 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v5.2.1",
+            "version": "v5.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "0b9231a5922fd7287ba5b411893c0ecd2733e5ba"
+                "reference": "196f45723b5e618bf0e23b97e96d11652696ea9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/0b9231a5922fd7287ba5b411893c0ecd2733e5ba",
-                "reference": "0b9231a5922fd7287ba5b411893c0ecd2733e5ba",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/196f45723b5e618bf0e23b97e96d11652696ea9e",
+                "reference": "196f45723b5e618bf0e23b97e96d11652696ea9e",
                 "shasum": ""
             },
             "require": {
@@ -2118,10 +2118,10 @@
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Symfony Finder Component",
+            "description": "Finds files and directories via an intuitive fluent interface",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/finder/tree/v5.2.1"
+                "source": "https://github.com/symfony/finder/tree/v5.2.2"
             },
             "funding": [
                 {
@@ -2137,7 +2137,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-12-08T17:02:38+00:00"
+            "time": "2021-01-27T10:01:46+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",

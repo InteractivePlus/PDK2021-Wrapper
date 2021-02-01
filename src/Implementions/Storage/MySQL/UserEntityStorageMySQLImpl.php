@@ -8,6 +8,8 @@ use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineEr
 use InteractivePlus\PDK2021Core\Base\Formats\IPFormat;
 use InteractivePlus\PDK2021Core\User\Formats\UserFormat;
 use InteractivePlus\PDK2021Core\User\Formats\UserPhoneUtil;
+use InteractivePlus\PDK2021Core\User\Setting\SettingBoolean;
+use InteractivePlus\PDK2021Core\User\Setting\UserSetting;
 use InteractivePlus\PDK2021Core\User\UserInfo\UserEntity;
 use InteractivePlus\PDK2021Core\User\UserInfo\UserEntityStorage;
 use InteractivePlus\PDK2021Core\User\UserSystemFormatSetting;
@@ -19,8 +21,8 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
 
     private MysqliDb $db;
 
-    public function __construct(MysqliDb $db, UserSystemFormatSetting $formatSetting){
-        parent::__construct($formatSetting);
+    public function __construct(MysqliDb $db, UserSystemFormatSetting $formatSetting, UserSetting $userSystemDefaultSettings){
+        parent::__construct($formatSetting,$userSystemDefaultSettings);
         $this->db = $db;
     }
 
@@ -50,6 +52,7 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
                 `create_time` INT UNSIGNED NOT NULL,
                 `create_client_addr` VARCHAR({$ipMaxLen}) NOT NULL,
                 `frozen` TINYINT(1) NOT NULL,
+                `settings` TEXT,
                 PRIMARY KEY ( `uid`, `username` )
             )ENGINE=InnoDB CHARSET=utf8;"
         );
@@ -90,7 +93,8 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
             'phone_verified' => $userEntity->isPhoneVerified() ? 1 : 0,
             'create_time' => $userEntity->getAccountCreateTime(),
             'create_client_addr' => $userEntity->getAccountCreateIP(),
-            'frozen' => $userEntity->isAccountFrozen() ? 1 : 0
+            'frozen' => $userEntity->isAccountFrozen() ? 1 : 0,
+            'settings' => json_encode($this->settingObjToSettingJSONArr($userEntity->getSettings()))
         );
         $insertResult = $this->db->insert('user_infos',$dataToInsert);
         if(!$insertResult){
@@ -114,7 +118,8 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
             'phone_verified' => $user->isPhoneVerified() ? 1 : 0,
             'create_time' => $user->getAccountCreateTime(),
             'create_client_addr' => $user->getAccountCreateIP(),
-            'frozen' => $user->isAccountFrozen() ? 1 : 0
+            'frozen' => $user->isAccountFrozen() ? 1 : 0,
+            'settings' => json_encode($this->settingObjToSettingJSONArr($user->getSettings()))
         );
         $this->db->where('uid',$user->getUID());
         $result = $this->db->update('user_infos',$dataToUpdate, 1);
@@ -145,7 +150,30 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
         return $uid === null ? -1 : $uid;
     }
 
+    protected function settingObjToSettingJSONArr(UserSetting $setting) : array{
+        return array(
+            'notificationEmail' => $setting->allowNotificationEmails(),
+            'saleEmail' => $setting->allowSaleEmails(),
+            'notificationSMS' => $setting->allowNotificationSMS(),
+            'saleSMS' => $setting->allowSaleSMS(),
+            'notificationCall' => $setting->allowNotificationCall(),
+            'saleCall' => $setting->allowSaleCall()
+        );
+    }
+
+    protected function settingArrToSettingObj(array $settingArr) : UserSetting{
+        return new UserSetting(
+            is_int($settingArr['notificationEmail']) ? $settingArr['notificationEmail'] : SettingBoolean::INHERIT,
+            is_int($settingArr['saleEmail']) ? $settingArr['saleEmail'] : SettingBoolean::INHERIT,
+            is_int($settingArr['notificationSMS']) ? $settingArr['notificationSMS'] : SettingBoolean::INHERIT,
+            is_int($settingArr['saleSMS']) ? $settingArr['saleSMS'] : SettingBoolean::INHERIT,
+            is_int($settingArr['notificationCall']) ? $settingArr['notificationCall'] : SettingBoolean::INHERIT,
+            is_int($settingArr['saleCall']) ? $settingArr['saleCall'] : SettingBoolean::INHERIT,
+        );
+    }
+
     protected function getUserEntityByDatabaseRow(array $dataRow) : UserEntity{
+        $usrSetting = $this->settingArrToSettingObj(!empty($dataRow['settings']) ? json_decode($dataRow['settings'],true) : array());
         $newEntity = UserEntity::fromDatabase(
             $dataRow['uid'],
             $dataRow['username'],
@@ -159,7 +187,9 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
             $dataRow['create_time'],
             $dataRow['create_client_addr'],
             $dataRow['frozen'] === 1 ? true : false,
-            $this->getFormatSetting()
+            $this->getFormatSetting(),
+            parent::getDefaultSetting(),
+            $usrSetting
         );
         return $newEntity;
     }
@@ -214,7 +244,7 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
         }
         $dataLimit = null;
         if($dataCountLimit != -1){
-            $dataLimit = array($dataOffset, $dataCountLimit);            
+            $dataLimit = array($dataOffset, $dataCountLimit);
         }
         $result = $this->db->withTotalCount()->get('user_infos',$dataLimit);
         if(!$result){
