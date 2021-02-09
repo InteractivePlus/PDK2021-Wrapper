@@ -21,6 +21,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
     public function createTables() : void{
         $accessTokenLen = APPFormat::getAPPAccessTokenStringLength();
         $refreshTokenLen = APPFormat::getAPPRefreshTokenStringLength();
+        $clientIDLen = APPFormat::getAPPIDStringLength();
         $maskIDLen = MaskIDFormat::getMaskIDStringLength();
 
         $mysqli = $this->db->mysqli();
@@ -35,6 +36,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
                 `refresh_expire_time` INT UNSIGNED NOT NULL,
                 `mask_id` CHAR({$maskIDLen}) NOT NULL,
                 `appuid` INT UNSIGNED NOT NULL,
+                `client_id` CHAR({$clientIDLen}) NOT NULL,
                 `obtained_method` INT UNSIGNED NOT NULL,
                 `scopes` TINYTEXT,
                 `valid` TINYINT(1) NOT NULL,
@@ -83,6 +85,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
             'refresh_expire_time' => $Token->refreshExpireTime,
             'mask_id' => $Token->getMaskID(),
             'appuid' => $Token->appuid,
+            'client_id' => $Token->getClientID(),
             'obtained_method' => $Token->getObtainedMethod(),
             'scopes' => $this->scopeArrayToScopeData($Token->scopes),
             'valid' => $Token->valid ? 1 : 0
@@ -118,6 +121,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
             $dataRow['refresh_expire_time'],
             $dataRow['mask_id'],
             $dataRow['appuid'],
+            $dataRow['client_id'],
             $dataRow['obtained_method'],
             $this->scopeDataToScopeArray($dataRow['scopes']),
             $dataRow['valid'] === 1
@@ -150,6 +154,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
             'refresh_expire_time' => $Token->refreshExpireTime,
             'mask_id' => $Token->getMaskID(),
             'appuid' => $Token->appuid,
+            'client_id' => $Token->getClientID(),
             'obtained_method' => $Token->getObtainedMethod(),
             'scopes' => $this->scopeArrayToScopeData($Token->scopes),
             'valid' => $Token->valid ? 1 : 0
@@ -221,7 +226,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
         );
     }
 
-    public function clearAPPToken(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appid = APPSystemConstants::NO_APP_RELATED_APPUID) : void{
+    public function clearAPPToken(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appuid = APPSystemConstants::NO_APP_RELATED_APPUID) : void{
         if($issueTimeMin > 0){
             $this->db->where('issue_time',$issueTimeMin,'>=');
         }
@@ -249,8 +254,8 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
         if(!empty($maskID)){
             $this->db->where('mask_id','%' . $maskID . '%', 'LIKE');
         }
-        if($appid != APPSystemConstants::NO_APP_RELATED_APPUID){
-            $this->db->where('appuid',$appid);
+        if($appuid != APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('appuid',$appuid);
         }
         $result = $this->db->delete('oauth_tokens');
         if(!$result){
@@ -258,7 +263,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
         }
     }
     
-    public function getAPPTokenCount(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appid = APPSystemConstants::NO_APP_RELATED_APPUID) : int{
+    public function getAPPTokenCount(int $issueTimeMin = 0, int $issueTimeMax = 0, int $expireTimeMin = 0, int $expireTimeMax =0, int $lastRenewTimeMin = 0, int $lastRenewTimeMax = 0, int $refreshExpireMin = 0, int $refreshExpireMax = 0, ?string $maskID = null, int $appuid = APPSystemConstants::NO_APP_RELATED_APPUID) : int{
         if($issueTimeMin > 0){
             $this->db->where('issue_time',$issueTimeMin,'>=');
         }
@@ -286,8 +291,8 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
         if(!empty($maskID)){
             $this->db->where('mask_id','%' . $maskID . '%', 'LIKE');
         }
-        if($appid != APPSystemConstants::NO_APP_RELATED_APPUID){
-            $this->db->where('appuid',$appid);
+        if($appuid != APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('appuid',$appuid);
         }
         $result = $this->db->getValue('oauth_tokens','count(*)');
         if(!$result){
