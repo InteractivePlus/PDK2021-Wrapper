@@ -203,16 +203,16 @@
         },
         {
             "name": "alibabacloud/sdk",
-            "version": "1.8.832",
+            "version": "1.8.852",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aliyun/openapi-sdk-php.git",
-                "reference": "c9bc1c08a170eabeef3e649af6892a87955c4051"
+                "reference": "719ff594ca9911391414dc6e639b81adf0e549b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/c9bc1c08a170eabeef3e649af6892a87955c4051",
-                "reference": "c9bc1c08a170eabeef3e649af6892a87955c4051",
+                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/719ff594ca9911391414dc6e639b81adf0e549b5",
+                "reference": "719ff594ca9911391414dc6e639b81adf0e549b5",
                 "shasum": ""
             },
             "require": {
@@ -437,7 +437,7 @@
                 "issues": "https://github.com/aliyun/openapi-sdk-php/issues",
                 "source": "https://github.com/aliyun/openapi-sdk-php"
             },
-            "time": "2021-02-01T09:15:49+00:00"
+            "time": "2021-02-08T10:39:48+00:00"
         },
         {
             "name": "clagiordano/weblibs-configmanager",
@@ -609,16 +609,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.12.17",
+            "version": "8.12.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "d914436bd646e9d645e7f8ac6644bf7e33a023d4"
+                "reference": "2d50e0aea1f70508b39a3d22c62d24d66d532ed2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/d914436bd646e9d645e7f8ac6644bf7e33a023d4",
-                "reference": "d914436bd646e9d645e7f8ac6644bf7e33a023d4",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/2d50e0aea1f70508b39a3d22c62d24d66d532ed2",
+                "reference": "2d50e0aea1f70508b39a3d22c62d24d66d532ed2",
                 "shasum": ""
             },
             "require": {
@@ -678,7 +678,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2021-01-27T19:06:58+00:00"
+            "time": "2021-02-08T10:31:32+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -1066,12 +1066,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "58a82db48e5696eb4405bda63aeffe603c02875b"
+                "reference": "4b4e7c71d22fd7c9b1e61ebbaeb610b93d3aab72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/58a82db48e5696eb4405bda63aeffe603c02875b",
-                "reference": "58a82db48e5696eb4405bda63aeffe603c02875b",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/4b4e7c71d22fd7c9b1e61ebbaeb610b93d3aab72",
+                "reference": "4b4e7c71d22fd7c9b1e61ebbaeb610b93d3aab72",
                 "shasum": ""
             },
             "require": {
@@ -1101,7 +1101,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-02-01T11:26:54+00:00"
+            "time": "2021-02-09T05:25:57+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -2080,16 +2080,16 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v5.2.2",
+            "version": "v5.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "196f45723b5e618bf0e23b97e96d11652696ea9e"
+                "reference": "4adc8d172d602008c204c2e16956f99257248e03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/196f45723b5e618bf0e23b97e96d11652696ea9e",
-                "reference": "196f45723b5e618bf0e23b97e96d11652696ea9e",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/4adc8d172d602008c204c2e16956f99257248e03",
+                "reference": "4adc8d172d602008c204c2e16956f99257248e03",
                 "shasum": ""
             },
             "require": {
@@ -2121,7 +2121,7 @@
             "description": "Finds files and directories via an intuitive fluent interface",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/finder/tree/v5.2.2"
+                "source": "https://github.com/symfony/finder/tree/v5.2.3"
             },
             "funding": [
                 {
@@ -2137,7 +2137,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-01-27T10:01:46+00:00"
+            "time": "2021-01-28T22:06:19+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -3193,16 +3193,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.5.1",
+            "version": "9.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "e7bdf4085de85a825f4424eae52c99a1cec2f360"
+                "reference": "f661659747f2f87f9e72095bb207bceb0f151cb4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e7bdf4085de85a825f4424eae52c99a1cec2f360",
-                "reference": "e7bdf4085de85a825f4424eae52c99a1cec2f360",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/f661659747f2f87f9e72095bb207bceb0f151cb4",
+                "reference": "f661659747f2f87f9e72095bb207bceb0f151cb4",
                 "shasum": ""
             },
             "require": {
@@ -3280,7 +3280,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.1"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.2"
             },
             "funding": [
                 {
@@ -3292,7 +3292,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-01-17T07:42:25+00:00"
+            "time": "2021-02-02T14:45:58+00:00"
         },
         {
             "name": "sebastian/cli-parser",

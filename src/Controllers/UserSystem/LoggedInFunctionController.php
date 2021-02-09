@@ -1,6 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021\Controllers\UserSystem;
 
+use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\VeriCode\VeriCodeController;
 use InteractivePlus\PDK2021\OutputUtils\UserOutputUtil;
@@ -55,7 +56,7 @@ class LoggedInFunctionController{
             if(empty($REQ_NEW_EMAIL) || !is_string($REQ_NEW_EMAIL) || !$UserSystemFormatConfig->checkEmailAddr($REQ_NEW_EMAIL)){ //check new email
                 return ReturnableResponse::fromIncorrectFormattedParam('new_email')->toResponse($response);
             }
-            $checkAccessTokenResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+            $checkAccessTokenResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
             if($checkAccessTokenResponse !== null){
                 return $checkAccessTokenResponse->toResponse($response);
             }
@@ -146,7 +147,7 @@ class LoggedInFunctionController{
             }catch(PDKInnerArgumentError $e){
                 return ReturnableResponse::fromIncorrectFormattedParam('new_phone')->toResponse($response);
             }
-            $checkAccessTokenResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+            $checkAccessTokenResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
             if($checkAccessTokenResponse !== null){
                 return $checkAccessTokenResponse->toResponse($response);
             }
@@ -224,7 +225,7 @@ class LoggedInFunctionController{
         }
 
         //check if user credential is valid
-        $credentialCheckResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        $credentialCheckResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
         if($credentialCheckResponse !== null){
             return $credentialCheckResponse->toResponse($response);
         }

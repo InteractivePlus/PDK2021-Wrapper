@@ -1,13 +1,11 @@
 <?php
 namespace InteractivePlus\PDK2021\Controllers\VeriCode;
 
-use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
-use InteractivePlus\PDK2021\Controllers\CheckVericodeResponse;
+use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
+use InteractivePlus\PDK2021\GatewayFunctions\CheckVericodeResponse;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
-use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
-use InteractivePlus\PDK2021Core\Base\DataOperations\MultipleResult;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerArgumentError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKItemAlreadyExistError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKRequestParamFormatError;
@@ -31,27 +29,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class VeriCodeController{
-    public static function getCheckVerificationCodeResponse($verificationCode, int $vericodeID, int $currentTime, int $appuid) : CheckVericodeResponse{
-        if(empty($verificationCode) || !is_string($verificationCode) || !VeriCodeFormat::isValidVerificationCode($verificationCode)){
-            return new CheckVericodeResponse(false,ReturnableResponse::fromIncorrectFormattedParam('veriCode'),null);
-        }
-        $veriCodeStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
-        $veriCodeEntity = $veriCodeStorage->getVeriCodeEntity($verificationCode);
-        if($veriCodeEntity === null){
-            return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
-        }
-        if($veriCodeEntity->getVeriCodeID()->getVeriCodeID() !== $vericodeID){
-            return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
-        }
-        if(!$veriCodeEntity->canUse($currentTime)){
-            return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
-        }
-        if($veriCodeEntity->getAPPUID() != $appuid){
-            return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
-        }
-        return new CheckVericodeResponse(true,null,$veriCodeEntity);
-    }
-
     public static function getCheckPhonePartialCodeResponse($verificationCode, $uid, int $vericodeID, int $currentTime, int $appuid) : CheckVericodeResponse{
         if(empty($verificationCode) || !is_string($verificationCode) || !VeriCodeFormat::isValidPartialPhoneVerificationCode($verificationCode)){
             return new CheckVericodeResponse(false,ReturnableResponse::fromIncorrectFormattedParam('veriCode'),null);
@@ -87,7 +64,7 @@ class VeriCodeController{
         if(!empty($verificationCode) && is_string($verificationCode) && VeriCodeFormat::isValidPartialPhoneVerificationCode($verificationCode)){
             return self::getCheckPhonePartialCodeResponse($verificationCode,$uid,$vericodeID,$currentTime, $appuid);
         }else{
-            return self::getCheckVerificationCodeResponse($verificationCode,$vericodeID,$currentTime, $appuid);
+            return CommonFunction::getCheckVerificationCodeResponse($verificationCode,$vericodeID,$currentTime, $appuid);
         }
     }
 
@@ -97,7 +74,7 @@ class VeriCodeController{
         $ctime = time();
 
         //first check if this vericode is a valid one
-        $checkVeriCodeResponse = self::getCheckVerificationCodeResponse($REQ_VERICODE,VeriCodeIDs::VERICODE_VERIFY_EMAIL()->getVeriCodeID(),$ctime,APPSystemConstants::INTERACTIVEPDK_APPUID);
+        $checkVeriCodeResponse = CommonFunction::getCheckVerificationCodeResponse($REQ_VERICODE,VeriCodeIDs::VERICODE_VERIFY_EMAIL()->getVeriCodeID(),$ctime,APPSystemConstants::INTERACTIVEPDK_APPUID);
         if(!$checkVeriCodeResponse->succeed){
             return $checkVeriCodeResponse->returnableResponse->toResponse($response);
         }
@@ -248,7 +225,7 @@ class VeriCodeController{
         }
 
         $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
-        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        $captchaResponse = CommonFunction::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
         if($captchaResponse !== null){
             return $captchaResponse->toResponse($response);
         }
@@ -289,7 +266,7 @@ class VeriCodeController{
         }
 
         $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
-        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        $captchaResponse = CommonFunction::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
         if($captchaResponse !== null){
             return $captchaResponse->toResponse($response);
         }
@@ -362,7 +339,7 @@ class VeriCodeController{
         }
 
         //check token entity
-        $tokenCheckResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        $tokenCheckResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
         if($tokenCheckResponse !== null){
             return $tokenCheckResponse->toResponse($response);
         }
@@ -474,7 +451,7 @@ class VeriCodeController{
         }
 
         //check token entity
-        $tokenCheckResponse = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        $tokenCheckResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
         if($tokenCheckResponse !== null){
             return $tokenCheckResponse->toResponse($response);
         }
@@ -575,7 +552,7 @@ class VeriCodeController{
         $VeriCodeID = empty($REQ_ACCESS_TOKEN) ? VeriCodeIDs::VERICODE_FORGET_PASSWORD() : VeriCodeIDs::VERICODE_CHANGE_PASSWORD();
         $UserEntity = null;
         if(!empty($REQ_ACCESS_TOKEN)){
-            $checkTokenResult = LoginController::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+            $checkTokenResult = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
             if($checkTokenResult !== null){
                 return $checkTokenResult->toResponse($response);
             }
@@ -586,7 +563,7 @@ class VeriCodeController{
             }
         }else{
             $REQ_CAPTCHA_ID = $REQ_PARAMS['captcha_id'];
-            $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+            $captchaResponse = CommonFunction::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
             if($captchaResponse !== null){
                 return $captchaResponse->toResponse($response);
             }

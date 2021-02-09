@@ -10,24 +10,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class SimpleCaptchaController{
-    public static function useAndCheckCaptchaResult($captchaID) : ?ReturnableResponse{
-        if(empty($captchaID) || !is_string($captchaID) || !CaptchaFormat::isValidCaptchaID($captchaID)){
-            return ReturnableResponse::fromIncorrectFormattedParam('captcha_id');
-        }
-        $captchaSystem = PDK2021Wrapper::$pdkCore->getCaptchaSystem();
-
-        $checkResult = false;
-        try{
-            $checkResult = $captchaSystem->checkAndUseCpatcha($captchaID);
-        }catch(PDKStorageEngineError $e){
-            return ReturnableResponse::fromPDKException($e);
-        }
-        if(!$checkResult){
-            return ReturnableResponse::fromCredentialMismatchError('captcha_id');
-        }
-        return null;
-    }
-
     public function getSimpleCaptcha(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
         $params = $request->getQueryParams();
         $captchaSystem = PDK2021Wrapper::$pdkCore->getCaptchaSystem();

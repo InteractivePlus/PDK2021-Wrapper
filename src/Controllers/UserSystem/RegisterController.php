@@ -3,6 +3,7 @@ namespace InteractivePlus\PDK2021\Controllers\UserSystem;
 
 use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
+use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerArgumentError;
@@ -56,7 +57,7 @@ class RegisterController{
         }
 
         $REQ_CAPTCHA_ID = $requestParams['captcha_id'];
-        $captchaResponse = SimpleCaptchaController::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
+        $captchaResponse = CommonFunction::useAndCheckCaptchaResult($REQ_CAPTCHA_ID);
         if($captchaResponse !== null){
             return $captchaResponse->toResponse($response);
         }
@@ -85,7 +86,8 @@ class RegisterController{
             $ctime,
             $REMOTE_ADDR,
             false,
-            $formatSetting
+            $formatSetting,
+            $entityStorage->getDefaultSetting()
         );
         $updatedUsrEntity = null;
         try{

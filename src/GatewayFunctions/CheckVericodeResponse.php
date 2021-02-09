@@ -1,6 +1,7 @@
 <?php
-namespace InteractivePlus\PDK2021\Controllers;
+namespace InteractivePlus\PDK2021\GatewayFunctions;
 
+use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeEntity;
 
 class CheckVericodeResponse{
