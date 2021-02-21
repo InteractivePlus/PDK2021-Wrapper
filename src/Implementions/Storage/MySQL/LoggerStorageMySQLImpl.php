@@ -116,7 +116,7 @@ class LoggerStorageMySQLImpl extends LoggerStorage implements MySQLStorageImpl{
             $numRows = array($offset,$count);
         }
         $result = $this->db->withTotalCount()->get('logs',$numRows);
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultOBJArray = array();

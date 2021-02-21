@@ -98,7 +98,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
     public function checkAccessTokenExist(string $AccessTokenString) : bool{
         $this->db->where('access_token',$AccessTokenString);
         $count = $this->db->getValue('oauth_tokens','count(*)');
-        if(!$count){
+        if($count === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count >= 1;
@@ -106,7 +106,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
     public function checkRefreshTokenExist(string $RefreshTokenString) : bool{
         $this->db->where('refresh_token',$RefreshTokenString);
         $count = $this->db->getValue('oauth_tokens','count(*)');
-        if(!$count){
+        if($count === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count >= 1;
@@ -211,7 +211,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
             $this->db->where('appuid',$appid);
         }
         $result = $this->db->withTotalCount()->get('oauth_tokens');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();
@@ -295,7 +295,7 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
             $this->db->where('appuid',$appuid);
         }
         $result = $this->db->getValue('oauth_tokens','count(*)');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $result;

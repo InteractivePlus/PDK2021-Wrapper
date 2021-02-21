@@ -247,7 +247,7 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
             $dataLimit = array($dataOffset, $dataCountLimit);
         }
         $result = $this->db->withTotalCount()->get('user_infos',$dataLimit);
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $objResultArr = array();
@@ -279,7 +279,7 @@ class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStora
             $this->db->where('create_time',$regTimeEnd,'<=');
         }
         $result = $this->db->getValue('user_infos','count(*)');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $result;

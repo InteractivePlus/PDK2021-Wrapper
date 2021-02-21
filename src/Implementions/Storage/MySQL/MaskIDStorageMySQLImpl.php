@@ -130,7 +130,7 @@ class MaskIDStorageMySQLImpl extends MaskIDEntityStorage implements MySQLStorage
     public function checkMaskIDExist(string $maskID) : int{
         $this->db->where('mask_id',$$maskID);
         $result = $this->db->getOne('maskid_infos');
-        if(!$result){
+        if($result === null){
             return -1;
         }else{
             return $result['uid'];
@@ -172,7 +172,7 @@ class MaskIDStorageMySQLImpl extends MaskIDEntityStorage implements MySQLStorage
             $dataLimit = array($dataOffset, $dataCountLimit);            
         }
         $result = $this->db->withTotalCount()->get('maskid_infos',$dataLimit);
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();

@@ -13,6 +13,9 @@ use InteractivePlus\PDK2021Core\User\Formats\TokenFormat;
 
 class CommonFunction{
     public static function useAndCheckCaptchaResult($captcha_id) : ?ReturnableResponse{
+        if(PDK2021Wrapper::$config->DEVELOPMENT_MODE){
+            return null;
+        }
         if(empty($captcha_id) || !is_string($captcha_id) || !CaptchaFormat::isValidCaptchaID($captcha_id)){
             return ReturnableResponse::fromIncorrectFormattedParam('captcha_id');
         }

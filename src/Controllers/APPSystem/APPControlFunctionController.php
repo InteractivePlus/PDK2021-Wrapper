@@ -21,7 +21,9 @@ class APPControlFunctionController{
         $REQ_DISPLAYNAME = $args['display_name'];
         $REQ_CLIENT_TYPE = $REQ_PARAMS['client_type'];
         if(!empty($REQ_CLIENT_TYPE)){
-            $REQ_CLIENT_TYPE = (int) $REQ_CLIENT_TYPE;
+            $REQ_CLIENT_TYPE = intval($REQ_CLIENT_TYPE);
+        }else{
+            return ReturnableResponse::fromIncorrectFormattedParam('client_type')->toResponse($response);
         }
         if(!PDKAPPType::isValidAppType($REQ_CLIENT_TYPE)){
             return ReturnableResponse::fromIncorrectFormattedParam('client_type')->toResponse($response);
@@ -43,7 +45,7 @@ class APPControlFunctionController{
             $REQ_UID = (int) $REQ_UID;
         }
 
-        if($APPEntityStorage->checkDisplayNameExist($REQ_DISPLAYNAME)){
+        if($APPEntityStorage->checkDisplayNameExist($REQ_DISPLAYNAME) !== -1){
             return ReturnableResponse::fromItemAlreadyExist('display_name')->toResponse($response);
         }
         $appEntity = APPEntity::create(
@@ -61,7 +63,7 @@ class APPControlFunctionController{
             return ReturnableResponse::fromPDKException($e)->toResponse($response);
         }
         if($appEntity == null){
-            return ReturnableResponse::fromItemAlreadyExist('display_name');
+            return ReturnableResponse::fromItemAlreadyExist('display_name')->toResponse($response);
         }
         $returnResponse = new ReturnableResponse(201,0);
         $returnResponse->returnDataLevelEntries['app'] = APPOutputUtil::getAPPEntityAsAssocArray($appEntity);

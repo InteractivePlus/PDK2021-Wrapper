@@ -127,7 +127,7 @@ class AuthCodeStorageMySQLImpl extends AuthCodeStorage implements MySQLStorageIm
     public function checkAuthCodeExist(string $authCode) : bool{
         $this->db->where('auth_code',$authCode);
         $result = $this->db->getValue('oauth_codes','count(*)');
-        if(!$result){
+        if($result === null){
             return -1;
         }else{
             return $result >= 1;
@@ -179,7 +179,7 @@ class AuthCodeStorageMySQLImpl extends AuthCodeStorage implements MySQLStorageIm
             $dataLimit = array($dataOffset, $dataCountLimit);            
         }
         $result = $this->db->withTotalCount()->get('oauth_codes',$dataLimit);
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();
@@ -216,7 +216,7 @@ class AuthCodeStorageMySQLImpl extends AuthCodeStorage implements MySQLStorageIm
             $this->db->where('appuid',$relatedAPPUID);
         }
         $count = $this->db->getValue('oauth_codes','count(*)');
-        if(!$count){
+        if($count === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count;

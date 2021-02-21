@@ -81,7 +81,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
     public function checkTokenExist(string $TokenString) : bool{
         $this->db->where('access_token',$TokenString);
         $count = $this->db->getValue('login_infos','count(*)');
-        if(!$count){
+        if($count === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count >= 1;
@@ -89,7 +89,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
     public function checkRefreshTokenExist(string $RefreshTokenString) : bool{
         $this->db->where('refresh_token',$RefreshTokenString);
         $count = $this->db->getValue('login_infos','count(*)');
-        if(!$count){
+        if($count === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count >= 1;
@@ -185,7 +185,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
             $this->db->where('related_uid',$uid);
         }
         $result = $this->db->withTotalCount()->get('login_infos');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();
@@ -263,7 +263,7 @@ class TokenEntityStorageMySQLImpl extends TokenEntityStorage implements MySQLSto
             $this->db->where('related_uid',$uid);
         }
         $result = $this->db->getValue('login_infos','count(*)');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $result;

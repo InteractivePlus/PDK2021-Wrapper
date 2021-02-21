@@ -121,7 +121,7 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
     public function checkAPPUIDExist(int $appuid) : bool{
         $this->db->where('appuid',$appuid);
         $result = $this->db->getValue('app_infos','count(*)');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $result >= 1;
@@ -129,7 +129,7 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
     public function checkClientIDExist(string $clientID) : int{
         $this->db->where('client_id',$clientID);
         $result = $this->db->getOne('app_infos');
-        if(!$result){
+        if($result === null){
             return -1;
         }else{
             return $result['appuid'];
@@ -138,7 +138,7 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
     public function checkDisplayNameExist(string $displayName) : int{
         $this->db->where('display_name',$displayName);
         $result = $this->db->getOne('app_infos');
-        if(!$result){
+        if($result === null){
             return -1;
         }else{
             return $result['appuid'];
@@ -186,7 +186,7 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             $dataLimit = array($dataOffset, $dataCountLimit);            
         }
         $result = $this->db->withTotalCount()->get('app_infos',$dataLimit);
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();
@@ -214,7 +214,7 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             $this->db->where('owner_uid',$ownerUID);
         }
         $count = $this->db->getValue('app_infos','count(*)');
-        if(!$count){
+        if($count === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count;

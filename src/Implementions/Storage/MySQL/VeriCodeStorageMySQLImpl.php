@@ -203,10 +203,10 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
             $this->db->where('vericode_id',$veriCodeID);
         }
         if(!empty($partialVericodeStr)){
-            $this->db->where('vericode_str',$partialVericodeStr . '%','LIKE');
+            $this->db->where('vericode_str', $partialVericodeStr . '%','LIKE');
         }
         $result = $this->db->withTotalCount()->get('verification_codes');
-        if(!$result){
+        if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         $resultObjArr = array();
