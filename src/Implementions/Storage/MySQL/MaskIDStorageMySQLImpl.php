@@ -1,7 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
-use InteractivePlus\PDK2021Core\APP\Format\MaskIDFormat;
+use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
 use InteractivePlus\PDK2021Core\APP\MaskID\MaskIDEntity;
 use InteractivePlus\PDK2021Core\APP\MaskID\MaskIDEntityStorage;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;

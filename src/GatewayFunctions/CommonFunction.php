@@ -4,8 +4,8 @@ namespace InteractivePlus\PDK2021\GatewayFunctions;
 
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
-use InteractivePlus\PDK2021Core\APP\Format\APPFormat;
-use InteractivePlus\PDK2021Core\APP\Format\MaskIDFormat;
+use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
+use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineError;
 use InteractivePlus\PDK2021Core\Captcha\Format\CaptchaFormat;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeFormat;

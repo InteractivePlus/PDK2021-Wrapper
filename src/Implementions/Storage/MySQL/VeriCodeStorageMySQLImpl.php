@@ -183,7 +183,7 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         );
     }
 
-    public function searchPhoneVeriCode(int $expireTimeMin = 0, int $expireTimeMax = 0, int $uid = UserSystemConstants::NO_USER_RELATED_UID, int $appuid = APPSystemConstants::NO_APP_RELATED_APPUID, string $partialVericodeStr, int $veriCodeID = 0) : MultipleResult{
+    public function searchPhoneVeriCode(int $expireTimeMin = 0, int $expireTimeMax = 0, int $uid = UserSystemConstants::NO_USER_RELATED_UID, int $appuid = APPSystemConstants::NO_APP_RELATED_APPUID, string $partialVericodeStr = null, int $veriCodeID = 0) : MultipleResult{
         if($expireTimeMin > 0){
             $this->db->where('expire_time',$expireTimeMin, '>=');
         }
@@ -202,7 +202,9 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         if($veriCodeID != 0){
             $this->db->where('vericode_id',$veriCodeID);
         }
-        $this->db->where('vericode_str',$partialVericodeStr . '%','LIKE');
+        if(!empty($partialVericodeStr)){
+            $this->db->where('vericode_str',$partialVericodeStr . '%','LIKE');
+        }
         $result = $this->db->withTotalCount()->get('verification_codes');
         if(!$result){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));

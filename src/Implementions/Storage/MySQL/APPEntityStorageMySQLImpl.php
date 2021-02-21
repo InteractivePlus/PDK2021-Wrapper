@@ -4,7 +4,7 @@ namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 use InteractivePlus\PDK2021Core\APP\APPInfo\APPEntity;
 use InteractivePlus\PDK2021Core\APP\APPInfo\APPEntityStorage;
 use InteractivePlus\PDK2021Core\APP\APPSystemFormatSetting;
-use InteractivePlus\PDK2021Core\APP\Format\APPFormat;
+use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
 use InteractivePlus\PDK2021Core\Base\DataOperations\MultipleResult;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineError;
@@ -31,8 +31,8 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             "CREATE TABLE IF NOT EXISTS `app_infos` (
                 `appuid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `display_name` VARCHAR({$displayNameMax}) NOT NULL,
-                `client_id` CHAR({$clientIDLen}),
-                `client_secret` CHAR({$clientSecretLen}),
+                `client_id` CHAR({$clientIDLen}) NOT NULL,
+                `client_secret` CHAR({$clientSecretLen}) NOT NULL,
                 `client_type` INT NOT NULL,
                 `redirect_uri` TINYTEXT NOT NULL,
                 `create_time` INT UNSIGNED NOT NULL,
@@ -100,7 +100,6 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
         if(!$result){
             throw new PDKStorageEngineError('failed to update data to database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
-        return $this->db->count >= 1;
     }
 
     protected function getAPPEntityByDatabaseRow(array $dataRow) : APPEntity{
@@ -136,6 +135,15 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             return $result['appuid'];
         }
     }
+    public function checkDisplayNameExist(string $displayName) : int{
+        $this->db->where('display_name',$displayName);
+        $result = $this->db->getOne('app_infos');
+        if(!$result){
+            return -1;
+        }else{
+            return $result['appuid'];
+        }
+    }
     public function getAPPEntityByAPPUID(int $appuid) : ?APPEntity{
         $this->db->where('appuid',$appuid);
         $result = $this->db->getOne('app_infos');
@@ -146,6 +154,14 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
     }
     public function getAPPEntityByClientID(string $clientID) : ?APPEntity{
         $this->db->where('client_id',$clientID);
+        $result = $this->db->getOne('app_infos');
+        if(!$result){
+            return null;
+        }
+        return $this->getAPPEntityByDatabaseRow($result);
+    }
+    public function getAPPEntityByDisplayName(string $displayName) : ?APPEntity{
+        $this->db->where('display_name',$displayName);
         $result = $this->db->getOne('app_infos');
         if(!$result){
             return null;

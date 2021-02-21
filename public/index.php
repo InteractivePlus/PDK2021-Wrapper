@@ -1,5 +1,6 @@
 <?php
 
+use InteractivePlus\PDK2021\Controllers\APPSystem\APPControlFunctionController;
 use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
@@ -103,5 +104,7 @@ $app->post('/vericodes/changePasswordRequest',VeriCodeController::class . ':requ
 $app->patch('/user/password',VeriCodeController::class . ':changePassword');
 
 $app->patch('/user/userInfo',LoggedInFunctionController::class . ':changeUserInfo');
+
+$app->post('/apps/{display_name}',APPControlFunctionController::class . ':createNewAPP');
 
 $app->run();

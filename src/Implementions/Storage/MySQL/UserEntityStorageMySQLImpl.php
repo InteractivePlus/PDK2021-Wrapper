@@ -17,7 +17,7 @@ use libphonenumber\PhoneNumber;
 use MysqliDb;
 
 class UserEntityStorageMySQLImpl extends UserEntityStorage implements MySQLStorageImpl{
-    const PHONE_DEFAULT_COUNTRY = \LibI18N\Region::REGION_CN;
+    const PHONE_DEFAULT_COUNTRY = \InteractivePlus\LibI18N\Region::REGION_CN;
 
     private MysqliDb $db;
 
