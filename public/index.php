@@ -106,5 +106,6 @@ $app->patch('/user/password',VeriCodeController::class . ':changePassword');
 $app->patch('/user/userInfo',LoggedInFunctionController::class . ':changeUserInfo');
 
 $app->post('/apps/{display_name}',APPControlFunctionController::class . ':createNewAPP');
+$app->get('/user/{uid}/apps',APPControlFunctionController::class . ':listOwnedAPPs');
 
 $app->run();

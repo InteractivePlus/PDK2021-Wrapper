@@ -20,6 +20,9 @@ class APPControlFunctionController{
         $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
         $REQ_DISPLAYNAME = $args['display_name'];
         $REQ_CLIENT_TYPE = $REQ_PARAMS['client_type'];
+        $ctime = time();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+
         if(!empty($REQ_CLIENT_TYPE)){
             $REQ_CLIENT_TYPE = intval($REQ_CLIENT_TYPE);
         }else{
@@ -28,8 +31,7 @@ class APPControlFunctionController{
         if(!PDKAPPType::isValidAppType($REQ_CLIENT_TYPE)){
             return ReturnableResponse::fromIncorrectFormattedParam('client_type')->toResponse($response);
         }
-        $ctime = time();
-        $REMOTE_ADDR = $request->getAttribute('ip');
+        
         
         $APPEntityStorage = PDK2021Wrapper::$pdkCore->getAPPEntityStorage();
         $APPFormat = $APPEntityStorage->getFormatSetting();
@@ -68,5 +70,28 @@ class APPControlFunctionController{
         $returnResponse = new ReturnableResponse(201,0);
         $returnResponse->returnDataLevelEntries['app'] = APPOutputUtil::getAPPEntityAsAssocArray($appEntity);
         return $returnResponse->toResponse($response);
+    }
+    public function listOwnedAPPs(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REQ_UID = $args['uid'];
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+        $REMOTE_ADDR = $request->getAttribute('ip');
+        $ctime = time();
+
+        $checkLoginCredentialResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        if($checkLoginCredentialResponse !== null){
+            return $checkLoginCredentialResponse->toResponse($response);
+        }
+        $APPEntityStorage = PDK2021Wrapper::$pdkCore->getAPPEntityStorage();
+        $allSearchedResults = $APPEntityStorage->searchAPPEntity(null,-1,-1,intval($REQ_UID),0,-1);
+        $result = new ReturnableResponse(200,0);
+        $result->returnDataLevelEntries['apps'] = [];
+        $searchResultArr = $allSearchedResults->getResultArray();
+        if(!empty($searchResultArr)){
+            foreach($searchResultArr as $singleApp){
+                $result->returnDataLevelEntries['apps'][] = APPOutputUtil::getAPPEntityAsAssocArray($singleApp);
+            }
+        }
+        return $result->toResponse($response);
     }
 }
