@@ -8,6 +8,7 @@ use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineError;
 use InteractivePlus\PDK2021Core\Captcha\Format\CaptchaFormat;
+use InteractivePlus\PDK2021Core\Communication\CommunicationMethods\SentMethod;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeFormat;
 use InteractivePlus\PDK2021Core\User\Formats\TokenFormat;
 
@@ -73,6 +74,43 @@ class CommonFunction{
             return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
         }
         if($veriCodeEntity->getAPPUID() != $appuid){
+            return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
+        }
+        return new CheckVericodeResponse(true,null,$veriCodeEntity);
+    }
+    public static function getCheckAnyVeriCodeResponse($verificationCode, $uid, int $vericodeID, int $currentTime, int $appuid) : CheckVericodeResponse{
+        if(!empty($verificationCode) && is_string($verificationCode) && VeriCodeFormat::isValidPartialPhoneVerificationCode($verificationCode)){
+            return CommonFunction::getCheckPhonePartialCodeResponse($verificationCode,$uid,$vericodeID,$currentTime, $appuid);
+        }else{
+            return CommonFunction::getCheckVerificationCodeResponse($verificationCode,$vericodeID,$currentTime, $appuid);
+        }
+    }
+    public static function getCheckPhonePartialCodeResponse($verificationCode, $uid, int $vericodeID, int $currentTime, int $appuid) : CheckVericodeResponse{
+        if(empty($verificationCode) || !is_string($verificationCode) || !VeriCodeFormat::isValidPartialPhoneVerificationCode($verificationCode)){
+            return new CheckVericodeResponse(false,ReturnableResponse::fromIncorrectFormattedParam('veriCode'),null);
+        }
+        
+        if(empty($uid) || $uid < 0){
+            return new CheckVericodeResponse(false,ReturnableResponse::fromIncorrectFormattedParam('uid'),null);
+        }else{
+            $uid = (int) $uid;
+        }
+
+        $veriCodeStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
+        
+        $searchedResults = $veriCodeStorage->searchPhoneVeriCode($currentTime + 1,0,$uid,$appuid,$verificationCode,$vericodeID);
+        if($searchedResults->getNumResultsStored() < 1){
+            return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
+        }
+        $veriCodeEntity = null;
+        $searchedResultsArr = $searchedResults->getResultArray();
+        foreach($searchedResultsArr as $singleResult){
+            if($singleResult->canUse($currentTime) && ($singleResult->getSentMethod() === SentMethod::PHONE_CALL || $singleResult->getSentMethod() === SentMethod::SMS_MESSAGE)){
+                $veriCodeEntity = $singleResult;
+                break;
+            }
+        }
+        if($veriCodeEntity === null){
             return new CheckVericodeResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('veriCode'),null);
         }
         return new CheckVericodeResponse(true,null,$veriCodeEntity);

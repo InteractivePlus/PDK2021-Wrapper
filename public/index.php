@@ -107,5 +107,7 @@ $app->patch('/user/userInfo',LoggedInFunctionController::class . ':changeUserInf
 
 $app->post('/apps/{display_name}',APPControlFunctionController::class . ':createNewAPP');
 $app->get('/user/{uid}/apps',APPControlFunctionController::class . ':listOwnedAPPs');
+$app->post('/vericodes/deleteAPPRequest',VeriCodeController::class . ':requestDeleteAPPVeriCode');
+$app->delete('/apps/{appuid}',APPControlFunctionController::class . ':deleteOwnedAPP');
 
 $app->run();

@@ -168,6 +168,13 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
         }
         return $this->getAPPEntityByDatabaseRow($result);
     }
+    public function deleteAPPEntity(int $appuid) : void{
+        $this->db->where('appuid',$appuid);
+        $result = $this->db->delete('app_infos');
+        if(!$result){
+            throw new PDKStorageEngineError('failed to delete from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
+        }
+    }
     public function searchAPPEntity(?string $displayName = null, int $createTimeStart = -1, int $createTimeEnd = -1, int $ownerUID = UserSystemConstants::NO_USER_RELATED_UID, int $dataOffset = 0, int $dataCountLimit = -1) : MultipleResult{
         if(!empty($displayName)){
             $this->db->where('display_name','%' . $displayName . '%', 'LIKE');

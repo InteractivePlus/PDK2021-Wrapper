@@ -6,6 +6,7 @@ use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
 use InteractivePlus\PDK2021Core\Base\DataOperations\MultipleResult;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineError;
 use InteractivePlus\PDK2021Core\Base\Formats\IPFormat;
+use InteractivePlus\PDK2021Core\Communication\CommunicationMethods\SentMethod;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeEntity;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeFormat;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeID;
@@ -164,6 +165,8 @@ class VeriCodeStorageMySQLImpl extends VeriCodeStorage implements MySQLStorageIm
         if($appuid !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('related_appuid',$appuid);
         }
+        $this->db->where('sent_method',SentMethod::SMS_MESSAGE,'>=');
+        $this->db->where('sent_method',SentMethod::PHONE_CALL,'<=');
         if($veriCodeID != 0){
             $this->db->where('vericode_id',$veriCodeID);
         }

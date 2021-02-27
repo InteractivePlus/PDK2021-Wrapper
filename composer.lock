@@ -203,16 +203,16 @@
         },
         {
             "name": "alibabacloud/sdk",
-            "version": "1.8.873",
+            "version": "1.8.879",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aliyun/openapi-sdk-php.git",
-                "reference": "f31d3c0ce88ecb4663f137ddeca9d27b9259fce2"
+                "reference": "2190dc2014738f7ddc6939f33a4d6bb8a9cff009"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/f31d3c0ce88ecb4663f137ddeca9d27b9259fce2",
-                "reference": "f31d3c0ce88ecb4663f137ddeca9d27b9259fce2",
+                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/2190dc2014738f7ddc6939f33a4d6bb8a9cff009",
+                "reference": "2190dc2014738f7ddc6939f33a4d6bb8a9cff009",
                 "shasum": ""
             },
             "require": {
@@ -437,7 +437,7 @@
                 "issues": "https://github.com/aliyun/openapi-sdk-php/issues",
                 "source": "https://github.com/aliyun/openapi-sdk-php"
             },
-            "time": "2021-02-20T15:29:49+00:00"
+            "time": "2021-02-26T06:24:45+00:00"
         },
         {
             "name": "clagiordano/weblibs-configmanager",
@@ -1066,12 +1066,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "6407ea873973b20407735fe9af9348316b37c7b7"
+                "reference": "e5b030eedc584b9ecca31311c44d753d0aebaa27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/6407ea873973b20407735fe9af9348316b37c7b7",
-                "reference": "6407ea873973b20407735fe9af9348316b37c7b7",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/e5b030eedc584b9ecca31311c44d753d0aebaa27",
+                "reference": "e5b030eedc584b9ecca31311c44d753d0aebaa27",
                 "shasum": ""
             },
             "require": {
@@ -1101,7 +1101,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-02-21T07:05:00+00:00"
+            "time": "2021-02-27T13:50:34+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -2599,16 +2599,16 @@
         },
         {
             "name": "phar-io/version",
-            "version": "3.0.4",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phar-io/version.git",
-                "reference": "e4782611070e50613683d2b9a57730e9a3ba5451"
+                "reference": "bae7c545bef187884426f042434e561ab1ddb182"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phar-io/version/zipball/e4782611070e50613683d2b9a57730e9a3ba5451",
-                "reference": "e4782611070e50613683d2b9a57730e9a3ba5451",
+                "url": "https://api.github.com/repos/phar-io/version/zipball/bae7c545bef187884426f042434e561ab1ddb182",
+                "reference": "bae7c545bef187884426f042434e561ab1ddb182",
                 "shasum": ""
             },
             "require": {
@@ -2644,9 +2644,9 @@
             "description": "Library for handling version information and constraints",
             "support": {
                 "issues": "https://github.com/phar-io/version/issues",
-                "source": "https://github.com/phar-io/version/tree/3.0.4"
+                "source": "https://github.com/phar-io/version/tree/3.1.0"
             },
-            "time": "2020-12-13T23:18:30+00:00"
+            "time": "2021-02-23T14:00:09+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
