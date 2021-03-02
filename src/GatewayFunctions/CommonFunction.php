@@ -6,11 +6,17 @@ use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
+use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
+use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
+use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKSenderServiceError;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKStorageEngineError;
 use InteractivePlus\PDK2021Core\Captcha\Format\CaptchaFormat;
 use InteractivePlus\PDK2021Core\Communication\CommunicationMethods\SentMethod;
+use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeEntity;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeFormat;
+use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeID;
 use InteractivePlus\PDK2021Core\User\Formats\TokenFormat;
+use InteractivePlus\PDK2021Core\User\UserInfo\UserEntity;
 
 class CommonFunction{
     public static function useAndCheckCaptchaResult($captcha_id) : ?ReturnableResponse{
@@ -142,5 +148,51 @@ class CommonFunction{
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('access_token'),$fetchedTokenEntity);
         }
         return new CheckAPPTokenResponse(true,null,$fetchedTokenEntity);
+    }
+    public static function sendVeriCode(VeriCodeID $veriCodeID, $preferredSendMethod, UserEntity $user, int $currentTime, string $remoteAddr, int $appuid = APPSystemConstants::INTERACTIVEPDK_APPUID) : SendVeriCodeResponse{
+        $actualSendingMethod = SentMethod::NOT_SENT;
+        $veriCode = new VeriCodeEntity(
+            $veriCodeID,
+            $currentTime,
+            $currentTime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
+            $user->getUID(),
+            $appuid,
+            null,
+            $remoteAddr
+        );
+        $VeriCodeEntityStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
+        while($VeriCodeEntityStorage->checkVeriCodeExist($veriCode->getVeriCodeString())){
+            $veriCode = $veriCode->withVeriCodeStringReroll();
+        }
+
+        if(($preferredSendMethod === SentMethod::EMAIL && !empty($user->getEmail()) && $user->isEmailVerified()) || ($preferredSendMethod !== SentMethod::EMAIL && ($user->getPhoneNumber() === null || !$user->isPhoneVerified()))){
+            $actualSendingMethod = SentMethod::EMAIL;
+            try{
+                PDK2021Wrapper::$pdkCore->getVeriCodeEmailSender()->sendVeriCode($veriCode,$user,$user->getEmail());
+            }catch(PDKSenderServiceError $e){
+                return new SendVeriCodeResponse(false,ReturnableResponse::fromPDKException($e));
+            }
+        }else if($user->getPhoneNumber() !== null && $user->isPhoneVerified()){
+            $sender = PDK2021Wrapper::$pdkCore->getPhoneSender($actualSendingMethod,$preferredSendMethod !== SentMethod::PHONE_CALL);
+            try{
+                $sender->sendVeriCode($veriCode,$user,$user->getPhoneNumber());
+            }catch(PDKSenderServiceError $e){
+                return new SendVeriCodeResponse(false,ReturnableResponse::fromPDKException($e));
+            }
+        }else{
+            return new SendVeriCodeResponse(false,ReturnableResponse::fromItemNotFound('communication_method'));
+        }
+        $veriCode = $veriCode->withSentMethod($actualSendingMethod);
+        $updatedEntity = null;
+        try{
+            $updatedEntity = $VeriCodeEntityStorage->addVeriCodeEntity($veriCode,false);
+        }catch(PDKStorageEngineError $e){
+            return new SendVeriCodeResponse(false,ReturnableResponse::fromPDKException($e));
+        }
+        if($updatedEntity === null){
+            return new SendVeriCodeResponse(false,ReturnableResponse::fromInnerError('failed to add vericode to database'));
+        }
+
+        return new SendVeriCodeResponse(true,null,$actualSendingMethod);
     }
 }

@@ -109,5 +109,8 @@ $app->post('/apps/{display_name}',APPControlFunctionController::class . ':create
 $app->get('/user/{uid}/apps',APPControlFunctionController::class . ':listOwnedAPPs');
 $app->post('/vericodes/deleteAPPRequest',VeriCodeController::class . ':requestDeleteAPPVeriCode');
 $app->delete('/apps/{appuid}',APPControlFunctionController::class . ':deleteOwnedAPP');
+$app->post('/vericodes/appImportantInformationRequest',VeriCodeController::class . ':requestAPPImportantActionVeriCode');
+$app->patch('/apps/{appuid}',APPControlFunctionController::class . ':changeAPPInfo');
+
 
 $app->run();

@@ -4,6 +4,7 @@ namespace InteractivePlus\PDK2021\Controllers\VeriCode;
 use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\GatewayFunctions\CheckVericodeResponse;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
+use InteractivePlus\PDK2021\GatewayFunctions\SendVeriCodeResponse;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKInnerArgumentError;
@@ -25,6 +26,7 @@ use InteractivePlus\PDK2021Core\User\Formats\UserPhoneUtil;
 use InteractivePlus\PDK2021Core\User\Login\LoginFailedReasons;
 use InteractivePlus\PDK2021Core\User\UserInfo\UserEntity;
 use InteractivePlus\PDK2021Core\User\UserInfo\UserEntityStorage;
+use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -503,12 +505,6 @@ class VeriCodeController{
         $UserEntityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();
         $UserSystemFormatConfig = $UserEntityStorage->getFormatSetting();
         $VericodeEntityStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
-
-        if(empty($REQ_PREFERRED_METHOD) || $REQ_PREFERRED_METHOD == SentMethod::NOT_SENT || !SentMethod::isSentMethodValid($REQ_PREFERRED_METHOD)){
-            $REQ_PREFERRED_METHOD = SentMethod::EMAIL;
-        }else{
-            $REQ_PREFERRED_METHOD = (int) $REQ_PREFERRED_METHOD;
-        }
         
         $VeriCodeID = empty($REQ_ACCESS_TOKEN) ? VeriCodeIDs::VERICODE_FORGET_PASSWORD() : VeriCodeIDs::VERICODE_CHANGE_PASSWORD();
         $UserEntity = null;
@@ -590,50 +586,20 @@ class VeriCodeController{
             return ReturnableResponse::fromInnerError('could not find user entity with a valid access_token')->toResponse($response);
         }
         
-        $setPasswordVeriCode = new VeriCodeEntity(
+        $sendCodeResponse = CommonFunction::sendVeriCode(
             $VeriCodeID,
+            $REQ_PREFERRED_METHOD,
+            $UserEntity,
             $ctime,
-            $ctime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
-            $UserEntity->getUID(),
-            APPSystemConstants::INTERACTIVEPDK_APPUID,
-            null,
-            $REMOTE_ADDR
+            $REMOTE_ADDR,
+            APPSystemConstants::INTERACTIVEPDK_APPUID
         );
-        while($VericodeEntityStorage->checkVeriCodeExist($setPasswordVeriCode->getVeriCodeString())){
-            $setPasswordVeriCode = $setPasswordVeriCode->withVeriCodeStringReroll();
+        if(!$sendCodeResponse->succeed){
+            return $sendCodeResponse->returnableResponse->toResponse($response);
         }
-
-        $actualSendingMethod = SentMethod::NOT_SENT;
-        if(($REQ_PREFERRED_METHOD === SentMethod::EMAIL && !empty($UserEntity->getEmail()) && $UserEntity->isEmailVerified()) || ($REQ_PREFERRED_METHOD !== SentMethod::EMAIL && ($UserEntity->getPhoneNumber() === null || !$UserEntity->isPhoneVerified()))){
-            $actualSendingMethod = SentMethod::EMAIL;
-            try{
-                PDK2021Wrapper::$pdkCore->getVeriCodeEmailSender()->sendVeriCode($setPasswordVeriCode,$UserEntity,$UserEntity->getEmail());
-            }catch(PDKSenderServiceError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
-            }
-        }else if($UserEntity->getPhoneNumber() !== null && $UserEntity->isPhoneVerified()){
-            $sender = PDK2021Wrapper::$pdkCore->getPhoneSender($actualSendingMethod,$REQ_PREFERRED_METHOD !== SentMethod::PHONE_CALL);
-            try{
-                $sender->sendVeriCode($setPasswordVeriCode,$UserEntity,$UserEntity->getPhoneNumber());
-            }catch(PDKSenderServiceError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
-            }
-        }else{
-            return ReturnableResponse::fromItemNotFound('communication_method')->toResponse($response);
-        }
-        $setPasswordVeriCode = $setPasswordVeriCode->withSentMethod($actualSendingMethod);
-        $updatedEntity = null;
-        try{
-            $updatedEntity = $VericodeEntityStorage->addVeriCodeEntity($setPasswordVeriCode,false);
-        }catch(PDKStorageEngineError $e){
-            return ReturnableResponse::fromPDKException($e)->toResponse($response);
-        }
-        if($updatedEntity === null){
-            return ReturnableResponse::fromInnerError('failed to add vericode to database')->toResponse($response);
-        }
-
+       
         $returnResult = new ReturnableResponse(201,0);
-        $returnResult->returnDataLevelEntries['sent_method'] = $actualSendingMethod;
+        $returnResult->returnDataLevelEntries['sent_method'] = $sendCodeResponse->sentMethod;
         return $returnResult->toResponse($response);
     }
     public function changePassword(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
@@ -745,61 +711,55 @@ class VeriCodeController{
         if($checkTokenResponse !== null){
             return $checkTokenResponse->toResponse($response);
         }
-
-        if(empty($REQ_PREF_SEND_METHOD) || $REQ_PREF_SEND_METHOD == SentMethod::NOT_SENT || !SentMethod::isSentMethodValid(intval($REQ_PREF_SEND_METHOD))){
-            $REQ_PREF_SEND_METHOD = SentMethod::SMS_MESSAGE;
-        }else{
-            $REQ_PREF_SEND_METHOD = intval($REQ_PREF_SEND_METHOD);
-        }
-
-        $VeriCodeEntityStorage = PDK2021Wrapper::$pdkCore->getVeriCodeStorage();
-
         $relatedUserEntity = PDK2021Wrapper::$pdkCore->getUserEntityStorage()->getUserEntityByUID(intval($REQ_UID));
 
-        $actualSendingMethod = SentMethod::NOT_SENT;
-        $veriCode = new VeriCodeEntity(
+        $sendReturn = CommonFunction::sendVeriCode(
             VeriCodeIDs::VERICODE_THIRD_APP_DELETE_ACTION(),
+            $REQ_PREF_SEND_METHOD,
+            $relatedUserEntity,
             $ctime,
-            $ctime + PDK2021Wrapper::$config->VERICODE_AVAILABLE_DURATION,
-            $relatedUserEntity->getUID(),
-            APPSystemConstants::INTERACTIVEPDK_APPUID,
-            null,
-            $REMOTE_ADDR
+            $REMOTE_ADDR,
+            APPSystemConstants::INTERACTIVEPDK_APPUID
         );
-        while($VeriCodeEntityStorage->checkVeriCodeExist($veriCode->getVeriCodeString())){
-            $veriCode = $veriCode->withVeriCodeStringReroll();
-        }
 
-        if(($REQ_PREF_SEND_METHOD === SentMethod::EMAIL && !empty($relatedUserEntity->getEmail()) && $relatedUserEntity->isEmailVerified()) || ($REQ_PREF_SEND_METHOD !== SentMethod::EMAIL && ($relatedUserEntity->getPhoneNumber() === null || !$relatedUserEntity->isPhoneVerified()))){
-            $actualSendingMethod = SentMethod::EMAIL;
-            try{
-                PDK2021Wrapper::$pdkCore->getVeriCodeEmailSender()->sendVeriCode($veriCode,$relatedUserEntity,$relatedUserEntity->getEmail());
-            }catch(PDKSenderServiceError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
-            }
-        }else if($relatedUserEntity->getPhoneNumber() !== null && $relatedUserEntity->isPhoneVerified()){
-            $sender = PDK2021Wrapper::$pdkCore->getPhoneSender($actualSendingMethod,$REQ_PREF_SEND_METHOD !== SentMethod::PHONE_CALL);
-            try{
-                $sender->sendVeriCode($veriCode,$relatedUserEntity,$relatedUserEntity->getPhoneNumber());
-            }catch(PDKSenderServiceError $e){
-                return ReturnableResponse::fromPDKException($e)->toResponse($response);
-            }
-        }else{
-            return ReturnableResponse::fromItemNotFound('communication_method')->toResponse($response);
+        if(!$sendReturn->succeed){
+            return $sendReturn->returnableResponse->toResponse($response);
         }
-        $veriCode = $veriCode->withSentMethod($actualSendingMethod);
-        $updatedEntity = null;
-        try{
-            $updatedEntity = $VeriCodeEntityStorage->addVeriCodeEntity($veriCode,false);
-        }catch(PDKStorageEngineError $e){
-            return ReturnableResponse::fromPDKException($e)->toResponse($response);
-        }
-        if($updatedEntity === null){
-            return ReturnableResponse::fromInnerError('failed to add vericode to database')->toResponse($response);
-        }
-
+        
         $returnResult = new ReturnableResponse(201,0);
-        $returnResult->returnDataLevelEntries['sent_method'] = $actualSendingMethod;
+        $returnResult->returnDataLevelEntries['sent_method'] = $sendReturn->sentMethod;
+        return $returnResult->toResponse($response);
+    }
+    public function requestAPPImportantActionVeriCode(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = json_decode($request->getBody(),true);
+        $REQ_UID = $REQ_PARAMS['uid'];
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+
+        $REMOTE_ADDR = $request->getAttribute('ip');
+        $ctime = time();
+        $REQ_PREF_SEND_METHOD = $REQ_PARAMS['preferred_send_method'];
+
+        $checkTokenResponse = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        if($checkTokenResponse !== null){
+            return $checkTokenResponse->toResponse($response);
+        }
+        $relatedUserEntity = PDK2021Wrapper::$pdkCore->getUserEntityStorage()->getUserEntityByUID(intval($REQ_UID));
+
+        $sendReturn = CommonFunction::sendVeriCode(
+            VeriCodeIDs::VERICODE_THIRD_APP_IMPORTANT_ACTION(),
+            $REQ_PREF_SEND_METHOD,
+            $relatedUserEntity,
+            $ctime,
+            $REMOTE_ADDR,
+            APPSystemConstants::INTERACTIVEPDK_APPUID
+        );
+
+        if(!$sendReturn->succeed){
+            return $sendReturn->returnableResponse->toResponse($response);
+        }
+        
+        $returnResult = new ReturnableResponse(201,0);
+        $returnResult->returnDataLevelEntries['sent_method'] = $sendReturn->sentMethod;
         return $returnResult->toResponse($response);
     }
 }
