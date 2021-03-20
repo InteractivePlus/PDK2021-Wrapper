@@ -42,7 +42,7 @@ class LoggedInFunctionController{
         if(!empty($REQ_VERIFICATION_CODE)){
             //check verification code
             $mustNotHaveExistingEmail = false;
-            $checkVerificationCodeResponse = VeriCodeController::getCheckAnyVeriCodeResponse($REQ_VERIFICATION_CODE,$REQ_UID,VeriCodeIDs::VERICODE_CHANGE_EMAIL()->getVeriCodeID(),$ctime,APPSystemConstants::INTERACTIVEPDK_APPUID);
+            $checkVerificationCodeResponse = CommonFunction::getCheckAnyVeriCodeResponse($REQ_VERIFICATION_CODE,$REQ_UID,VeriCodeIDs::VERICODE_CHANGE_EMAIL()->getVeriCodeID(),$ctime,APPSystemConstants::INTERACTIVEPDK_APPUID);
             if(!$checkVerificationCodeResponse->succeed){
                 return $checkVerificationCodeResponse->returnableResponse->toResponse($response);
             }
@@ -124,7 +124,7 @@ class LoggedInFunctionController{
         if(!empty($REQ_VERIFICATION_CODE)){
             //check verification code
             $mustNotHaveExistingPhone = false;
-            $checkVerificationCodeResponse = VeriCodeController::getCheckAnyVeriCodeResponse($REQ_VERIFICATION_CODE,$REQ_UID,VeriCodeIDs::VERICODE_CHANGE_PHONE()->getVeriCodeID(),$ctime,APPSystemConstants::INTERACTIVEPDK_APPUID);
+            $checkVerificationCodeResponse = CommonFunction::getCheckAnyVeriCodeResponse($REQ_VERIFICATION_CODE,$REQ_UID,VeriCodeIDs::VERICODE_CHANGE_PHONE()->getVeriCodeID(),$ctime,APPSystemConstants::INTERACTIVEPDK_APPUID);
             if(!$checkVerificationCodeResponse->succeed){
                 return $checkVerificationCodeResponse->returnableResponse->toResponse($response);
             }
@@ -265,5 +265,14 @@ class LoggedInFunctionController{
         $finalResponse = new ReturnableResponse(200,0);
         $finalResponse->returnDataLevelEntries['user'] = UserOutputUtil::getUserEntityAsAssocArray($UserEntity);
         return $finalResponse->toResponse($response);
+    }
+    public function getUserOwnedMaskIDs(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+        $ctime = time();
+        $REQ_UID = $REQ_PARAMS['uid'];
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+        $REQ_SPECIFIC_APPUID = $REQ_PARAMS['appuid'];
+        
     }
 }

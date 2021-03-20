@@ -15,7 +15,8 @@ class UserOutputUtil{
             "phone" => $userEntity->getPhoneNumber() === null ? null : UserPhoneUtil::outputPhoneNumberE164($userEntity->getPhoneNumber()),
             "emailVerified" => $userEntity->isEmailVerified(),
             "phoneVerified" => $userEntity->isPhoneVerified(),
-            "accountFrozen" => $userEntity->isAccountFrozen()
+            "accountFrozen" => $userEntity->isAccountFrozen(),
+            'settings' => UserSettingOutputUtil::getUserSettingAsAssocArray($userEntity->getSettings())
         );
     }
 }
