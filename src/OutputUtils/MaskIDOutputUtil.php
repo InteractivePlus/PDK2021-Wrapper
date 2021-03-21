@@ -1,13 +1,16 @@
 <?php
 namespace InteractivePlus\PDK2021\OutputUtils;
 
+use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\APP\MaskID\MaskIDEntity;
 
 class MaskIDOutputUtil{
     public static function getMaskIDAsAssocArray(MaskIDEntity $maskID) : array{
+        $APPEntityStorage = PDK2021Wrapper::$pdkCore->getAPPEntityStorage();
+        $APPEntity = $APPEntityStorage->getAPPEntityByAPPUID($maskID->appuid);
         return array(
             'mask_id' => $maskID->getMaskID(),
-            'appuid' => $maskID->appuid,
+            'client_id' => $APPEntity->getClientID(),
             'uid' => $maskID->uid,
             'display_name' => $maskID->getDisplayName(),
             'createTime' => $maskID->createTime,

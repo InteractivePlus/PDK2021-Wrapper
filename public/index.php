@@ -5,6 +5,7 @@ use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
+use InteractivePlus\PDK2021\Controllers\UserSystem\MaskIDFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\RegisterController;
 use InteractivePlus\PDK2021\Controllers\VeriCode\VeriCodeController;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
@@ -112,5 +113,6 @@ $app->delete('/apps/{appuid}',APPControlFunctionController::class . ':deleteOwne
 $app->post('/vericodes/appImportantInformationRequest',VeriCodeController::class . ':requestAPPImportantActionVeriCode');
 $app->patch('/apps/{appuid}',APPControlFunctionController::class . ':changeAPPInfo');
 
+$app->get('/masks/{client_id}',MaskIDFunctionController::class . ':listOwnedMaskIDs');
 
 $app->run();
