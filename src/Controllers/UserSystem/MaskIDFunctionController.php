@@ -63,7 +63,8 @@ class MaskIDFunctionController{
         $REQ_PARAMS = json_decode($request->getBody(),true);
         $REQ_UID = $REQ_PARAMS['uid'];
         $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
-        $REQ_CLIENT_ID = $REQ_PARAMS[''];
+        $REQ_CLIENT_ID = $REQ_PARAMS['client_id'];
+        $REQ_SETTING_ARRAY = $REQ_PARAMS['settings'];
         
     }
 }

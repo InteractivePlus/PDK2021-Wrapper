@@ -266,13 +266,4 @@ class LoggedInFunctionController{
         $finalResponse->returnDataLevelEntries['user'] = UserOutputUtil::getUserEntityAsAssocArray($UserEntity);
         return $finalResponse->toResponse($response);
     }
-    public function getUserOwnedMaskIDs(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
-        $REQ_PARAMS = $request->getQueryParams();
-        $REMOTE_ADDR = $request->getAttribute('ip');
-        $ctime = time();
-        $REQ_UID = $REQ_PARAMS['uid'];
-        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
-        $REQ_SPECIFIC_APPUID = $REQ_PARAMS['appuid'];
-        
-    }
 }
