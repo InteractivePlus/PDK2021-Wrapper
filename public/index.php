@@ -2,6 +2,7 @@
 
 use InteractivePlus\PDK2021\Controllers\APPSystem\APPControlFunctionController;
 use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
+use InteractivePlus\PDK2021\Controllers\OAuthSystem\AuthCodeController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
@@ -117,5 +118,7 @@ $app->get('/masks/{client_id}',MaskIDFunctionController::class . ':listOwnedMask
 $app->get('/masks',MaskIDFunctionController::class . ':listOwnedMaskIDs');
 $app->post('/masks/{client_id}',MaskIDFunctionController::class . ':createMaskID');
 $app->patch('/masks/{mask_id}',MaskIDFunctionController::class . ':modifyMaskID');
+
+$app->get('/authcode',AuthCodeController::class . ':getAuthCode');
 
 $app->run();
