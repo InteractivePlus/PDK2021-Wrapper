@@ -203,16 +203,16 @@
         },
         {
             "name": "alibabacloud/sdk",
-            "version": "1.8.927",
+            "version": "1.8.950",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aliyun/openapi-sdk-php.git",
-                "reference": "aed4e5037ab3f777644d760b8653293d56920f28"
+                "reference": "fd4252aabaf11ebcce8fd5fab9b873ec0a1dd658"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/aed4e5037ab3f777644d760b8653293d56920f28",
-                "reference": "aed4e5037ab3f777644d760b8653293d56920f28",
+                "url": "https://api.github.com/repos/aliyun/openapi-sdk-php/zipball/fd4252aabaf11ebcce8fd5fab9b873ec0a1dd658",
+                "reference": "fd4252aabaf11ebcce8fd5fab9b873ec0a1dd658",
                 "shasum": ""
             },
             "require": {
@@ -437,7 +437,7 @@
                 "issues": "https://github.com/aliyun/openapi-sdk-php/issues",
                 "source": "https://github.com/aliyun/openapi-sdk-php"
             },
-            "time": "2021-04-01T06:55:45+00:00"
+            "time": "2021-04-22T13:20:02+00:00"
         },
         {
             "name": "clagiordano/weblibs-configmanager",
@@ -609,16 +609,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.12.20",
+            "version": "8.12.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "743585979ef96f2be123518c0a58083cf678bd47"
+                "reference": "272b8123ba7f1b7975620c6389e7206281b4a3ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/743585979ef96f2be123518c0a58083cf678bd47",
-                "reference": "743585979ef96f2be123518c0a58083cf678bd47",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/272b8123ba7f1b7975620c6389e7206281b4a3ce",
+                "reference": "272b8123ba7f1b7975620c6389e7206281b4a3ce",
                 "shasum": ""
             },
             "require": {
@@ -678,7 +678,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2021-03-17T11:05:55+00:00"
+            "time": "2021-04-06T08:37:32+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -1067,12 +1067,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "b15c5892a97055de2642db638445758ba46b61e3"
+                "reference": "b3734ebc3e9fd47273239dfb523c0c56ce63ada2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/b15c5892a97055de2642db638445758ba46b61e3",
-                "reference": "b15c5892a97055de2642db638445758ba46b61e3",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/b3734ebc3e9fd47273239dfb523c0c56ce63ada2",
+                "reference": "b3734ebc3e9fd47273239dfb523c0c56ce63ada2",
                 "shasum": ""
             },
             "require": {
@@ -1102,7 +1102,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-03-20T13:26:56+00:00"
+            "time": "2021-04-24T08:41:06+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",

@@ -114,5 +114,8 @@ $app->post('/vericodes/appImportantInformationRequest',VeriCodeController::class
 $app->patch('/apps/{appuid}',APPControlFunctionController::class . ':changeAPPInfo');
 
 $app->get('/masks/{client_id}',MaskIDFunctionController::class . ':listOwnedMaskIDs');
+$app->get('/masks',MaskIDFunctionController::class . ':listOwnedMaskIDs');
+$app->post('/masks/{client_id}',MaskIDFunctionController::class . ':createMaskID');
+$app->patch('/masks/{mask_id}',MaskIDFunctionController::class . ':modifyMaskID');
 
 $app->run();

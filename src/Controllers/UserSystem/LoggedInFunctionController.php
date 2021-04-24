@@ -5,6 +5,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\VeriCode\VeriCodeController;
+use InteractivePlus\PDK2021\InputUtils\UserSettingInputUtil;
 use InteractivePlus\PDK2021\OutputUtils\UserOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
@@ -201,6 +202,7 @@ class LoggedInFunctionController{
         $REQ_SIGNATURE = null;
         $REQ_UID = $REQ_PARAMS['uid'];
         $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+        $REQ_SETTINGS_ARRAY = $REQ_PARAMS['settings'];
 
         $ctime = time();
 
@@ -212,8 +214,8 @@ class LoggedInFunctionController{
             $REQ_SIGNATURE = $REQ_PARAMS['signature'];
             $changeSignature = true;
         }
-        if(!$changeNickname && !$changeSignature){
-            return ReturnableResponse::fromIncorrectFormattedParam('nickname|signature')->toResponse($response);
+        if(!$changeNickname && !$changeSignature && empty($REQ_SETTINGS_ARRAY)){
+            return ReturnableResponse::fromIncorrectFormattedParam('nickname|signature|settings')->toResponse($response);
         }
         
         $UserEntityStorage = PDK2021Wrapper::$pdkCore->getUserEntityStorage();
@@ -224,6 +226,10 @@ class LoggedInFunctionController{
         }
         if($changeSignature && $REQ_SIGNATURE !== null && (!is_string($REQ_SIGNATURE) || !$UserSystemFormatConfig->checkSignature($REQ_SIGNATURE))){
             return ReturnableResponse::fromIncorrectFormattedParam('signature')->toResponse($response);
+        }
+
+        if(!empty($REQ_SETTINGS_ARRAY) && !is_array($REQ_SETTINGS_ARRAY)){
+            return ReturnableResponse::fromIncorrectFormattedParam('settings')->toResponse($response);
         }
 
         //check if user credential is valid
@@ -253,6 +259,12 @@ class LoggedInFunctionController{
         }
         if($changeSignature){
             $UserEntity->setSignature($REQ_SIGNATURE);
+        }
+
+        if(!empty($REQ_SETTINGS_ARRAY)){
+            $originalSettings = $UserEntity->getSettings();
+            $newSettings = UserSettingInputUtil::modifyWithSettingArray($originalSettings,$REQ_SETTINGS_ARRAY);
+            $UserEntity->setSettings($newSettings);
         }
 
         //Update User Entity

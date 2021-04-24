@@ -128,7 +128,7 @@ class MaskIDStorageMySQLImpl extends MaskIDEntityStorage implements MySQLStorage
     }
 
     public function checkMaskIDExist(string $maskID) : int{
-        $this->db->where('mask_id',$$maskID);
+        $this->db->where('mask_id',$maskID);
         $result = $this->db->getOne('maskid_infos');
         if($result === null){
             return -1;
@@ -137,7 +137,7 @@ class MaskIDStorageMySQLImpl extends MaskIDEntityStorage implements MySQLStorage
         }
     }
     public function getMaskIDEntityByMaskID(string $maskID) : ?MaskIDEntity{
-        $this->db->where('mask_id',$$maskID);
+        $this->db->where('mask_id',$maskID);
         $result = $this->db->getOne('maskid_infos');
         if(!$result){
             return null;
@@ -162,7 +162,7 @@ class MaskIDStorageMySQLImpl extends MaskIDEntityStorage implements MySQLStorage
             $this->db->where('create_time',$createTimeEnd,'<=');
         }
         if($ownerUID !== UserSystemConstants::NO_USER_RELATED_UID){
-            $this->db->where('owner_uid',$ownerUID);
+            $this->db->where('uid',$ownerUID);
         }
         if($appuid !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$appuid);
@@ -197,7 +197,7 @@ class MaskIDStorageMySQLImpl extends MaskIDEntityStorage implements MySQLStorage
             $this->db->where('create_time',$createTimeEnd,'<=');
         }
         if($ownerUID !== UserSystemConstants::NO_USER_RELATED_UID){
-            $this->db->where('owner_uid',$ownerUID);
+            $this->db->where('uid',$ownerUID);
         }
         if($appuid !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$appuid);

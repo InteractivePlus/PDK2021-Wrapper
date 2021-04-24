@@ -49,4 +49,41 @@ class UserSettingInputUtil{
         }
         return $returnValue;
     }
+    public static function modifyWithSettingArray(UserSetting $originalSetting, array $settingArray) : UserSetting{
+        /*
+        return array(
+            'allowEmailNotifications' => $userSetting->allowNotificationEmails(),
+            'allowSaleEmail' => $userSetting->allowSaleEmails(),
+            'allowSMSNotifications' => $userSetting->allowNotificationSMS(),
+            'allowSaleSMS' => $userSetting->allowSaleSMS(),
+            'allowCallNotifications' => $userSetting->allowNotificationCall(),
+            'allowSaleCall' => $userSetting->allowSaleCall()
+        );
+        */
+        $returnValue = clone $originalSetting;
+        foreach($settingArray as $sKey => $sVal){
+            $setVal = SettingBoolean::fixSetting($sVal);
+            switch($sKey){
+                case 'allowEmailNotifications':
+                    $returnValue->setAllowNotificationEmails($setVal);
+                    break;
+                case 'allowSaleEmail':
+                    $returnValue->setAllowSaleEmails($setVal);
+                    break;
+                case 'allowSMSNotifications':
+                    $returnValue->setAllowNotificationSMS($setVal);
+                    break;
+                case 'allowSaleSMS':
+                    $returnValue->setAllowSaleSMS($setVal);
+                    break;
+                case 'allowCallNotifications':
+                    $returnValue->setAllowNotificationCall($setVal);
+                    break;
+                case 'allowSaleCall':
+                    $returnValue->setAllowSaleCall($setVal);
+                    break;
+            }
+        }
+        return $returnValue;
+    }
 }
