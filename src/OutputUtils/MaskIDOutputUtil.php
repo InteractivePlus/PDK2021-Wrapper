@@ -17,4 +17,11 @@ class MaskIDOutputUtil{
             'settings' => UserSettingOutputUtil::getUserSettingAsAssocArray($maskID->getSettings())
         );
     }
+    public static function getMaskIDAsOAuthInfoAssocArray(MaskIDEntity $maskID) : array{
+        return array(
+            'mask_id' => $maskID->getMaskID(),
+            'display_name' => $maskID->getDisplayName(),
+            'settings' => UserSettingOutputUtil::getUserSettingAsAssocArray($maskID->getSettings())
+        );
+    }
 }

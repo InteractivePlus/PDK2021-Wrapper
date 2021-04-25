@@ -3,6 +3,7 @@
 use InteractivePlus\PDK2021\Controllers\APPSystem\APPControlFunctionController;
 use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\AccessCodeController;
+use InteractivePlus\PDK2021\Controllers\OAuthSystem\APPAbilityController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\AuthCodeController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
@@ -127,5 +128,6 @@ $app->post('/oauth_token',AccessCodeController::class . ':createAccessCode');
 $app->get('/oauth_token/verified_status',AccessCodeController::class . ':verifyAccessCode');
 $app->get('/oauth_token/refresh_result', AccessCodeController::class . ':refreshAPPToken');
 
+$app->get('/oauth_ability/user_info',APPAbilityController::class . ':getBasicInfo');
 
 $app->run();

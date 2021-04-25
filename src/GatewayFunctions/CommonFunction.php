@@ -163,6 +163,16 @@ class CommonFunction{
         }
         return new CheckAPPTokenResponse(true,null,$fetchedTokenEntity);
     }
+    public static function checkAPPTokenValidAndScopeSatisfiedResponse($access_token, string $scope, int $currentTime, $client_id, $client_secret, $mask_id) : CheckAPPTokenResponse{
+        $checkTokenResponse = self::checkAPPTokenValidResponse($access_token,$currentTime,$client_id,$client_secret,$mask_id);
+        if(!$checkTokenResponse->succeed){
+            return $checkTokenResponse;
+        }
+        if(!in_array(strtolower($scope),$checkTokenResponse->tokenEntity->scopes)){
+            return new CheckAPPTokenResponse(false,ReturnableResponse::fromPermissionDeniedError('scope not granted'),$checkTokenResponse->tokenEntity);
+        }
+        return new CheckAPPTokenResponse(true,null,$checkTokenResponse->tokenEntity);
+    }
     public static function sendVeriCode(VeriCodeID $veriCodeID, $preferredSendMethod, UserEntity $user, int $currentTime, string $remoteAddr, int $appuid = APPSystemConstants::INTERACTIVEPDK_APPUID) : SendVeriCodeResponse{
         $actualSendingMethod = SentMethod::NOT_SENT;
         $veriCode = new VeriCodeEntity(
