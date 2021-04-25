@@ -31,14 +31,28 @@ class Config{
     public bool $SLIM_CHECK_PROXY = false;
     public ?array $SLIM_PROXY_IPS = null;
 
+    public int $OAUTH_AUTHCODE_AVAILABLE_DURATION = 60 * 10;
+    public int $OAUTH_TOKEN_AVAILABLE_DURATION = 3600 * 24 * 15;
+    public int $OAUTH_REFRESH_TOKEN_AVAILABLE_DURATION = 3600 * 24 * 30;
     public int $VERICODE_AVAILABLE_DURATION = 1200;
-    public int $TOKEN_AVAILABLE_DURATION = 3600 * 24 * 1;
-    public int $REFRESH_TOKEN_AVAILABLE_DURATION = 3600 * 24 * 10;
+    public int $TOKEN_AVAILABLE_DURATION = 3600 * 24 * 15;
+    public int $REFRESH_TOKEN_AVAILABLE_DURATION = 3600 * 24 * 30;
     
     public int $CAPTCHA_AVAILABLE_DURATION = 60 * 5;
     public int $CAPTCHA_PHRASE_LEN = 5;
 
     public bool $DEVELOPMENT_MODE = true;
+    public array $FRONTEND_ROOT_URL_FOR_CORS = array(
+        'http://pdk.interactiveplus.org/',
+        'https://pdk.interactiveplus.org/',
+        'http://user.interactiveplus.org/',
+        'https://user.interactiveplus.org/'
+    );
+
+    public int $OAUTH_NOTIFICATION_TITLE_MAX_LEN = 20;
+    public int $OAUTH_NOTIFICATION_CONTENT_MAX_LEN = 200;
+    public int $OAUTH_SALE_TITLE_MAX_LEN = 20;
+    public int $OAUTH_SALE_CONTENT_MAX_LEN = 500;
     public function __construct()
     {
         $this->USER_SYSTEM_CONSTRAINTS = new UserSystemFormatSettingImpl(
