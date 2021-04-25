@@ -11,6 +11,7 @@ use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\MaskIDFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\RegisterController;
 use InteractivePlus\PDK2021\Controllers\VeriCode\VeriCodeController;
+use InteractivePlus\PDK2021\Middleware\PDKCORSMiddleware;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
@@ -83,6 +84,8 @@ $customErrorHandler = function(
 };
 
 $errMiddleWare->setDefaultErrorHandler($customErrorHandler);
+
+$app->addMiddleware(new PDKCORSMiddleware());
 
 $app->get('/captcha',SimpleCaptchaController::class . ':getSimpleCaptcha');
 $app->get('/captcha/{captcha_id}/submitResult',SimpleCaptchaController::class . ':getSimpleCaptchaSubmitResult');
