@@ -55,7 +55,7 @@ class PDK2021Wrapper{
             new DXTonServiceProvider($config->DXTON_USERNAME,$config->DXTON_APISecret,'utf8',false),
             new DXTonTemplateContentProvider,
             null,
-            true
+            false
         );
 
         self::$pdkCore = new PDKCore(
