@@ -68,6 +68,7 @@ class DXTonServiceProvider implements SMSServiceProvider{
             $post_data = 'account=' . $this->account . '&password=' . $this->apiSecret . '&mobile=' . $intlNumber . '&content=' . rawurlencode($content);
         }
         $postResult = self::Post($post_data,$target);
+        //var_dump($postResult);
         if($postResult === null){
             return false;
         }
@@ -86,7 +87,7 @@ class DXTonServiceProvider implements SMSServiceProvider{
         110			手机号发送频率持续过高，黑名单屏蔽数日
         120			系统升级
         */
-        if($postResult === '100'){
+        if($postResult === '100' || $postResult == 100){
             return true;
         }else{
             return false;

@@ -1,12 +1,15 @@
 <?php
 namespace InteractivePlus\PDK2021\GatewayFunctions;
 
-
+use InteractivePlus\LibI18N\Locale as LibI18NLocale;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
+use InteractivePlus\PDK2021Core\APP\APPInfo\APPEntity;
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenEntity;
 use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenObtainedMethod;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
+use InteractivePlus\PDK2021Core\APP\MaskID\MaskIDEntity;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
 use InteractivePlus\PDK2021Core\Base\Exception\ExceptionTypes\PDKSenderServiceError;
@@ -18,6 +21,7 @@ use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeFormat;
 use InteractivePlus\PDK2021Core\Communication\VerificationCode\VeriCodeID;
 use InteractivePlus\PDK2021Core\User\Formats\TokenFormat;
 use InteractivePlus\PDK2021Core\User\UserInfo\UserEntity;
+use Locale;
 
 class CommonFunction{
     public static function useAndCheckCaptchaResult($captcha_id) : ?ReturnableResponse{
@@ -215,6 +219,81 @@ class CommonFunction{
         }
         if($updatedEntity === null){
             return new SendVeriCodeResponse(false,ReturnableResponse::fromInnerError('failed to add vericode to database'));
+        }
+
+        return new SendVeriCodeResponse(true,null,$actualSendingMethod);
+    }
+    public static function sendThirdAPPMessage(bool $isNotification, $preferredSendMethod, string $title, string $content, UserEntity $user, MaskIDEntity $maskID, APPEntity $relatedAPP, APPTokenEntity $APPToken, int $currentTime, string $remoteAddr, ?string $locale = LibI18NLocale::LOCALE_zh_Hans_CN) : SendVeriCodeResponse{
+        $actualSendingMethod = SentMethod::NOT_SENT;
+        $emailSender = PDK2021Wrapper::$pdkCore->getVeriCodeEmailSender();
+        $smsSender = PDK2021Wrapper::$pdkCore->getVeriCodeSMSSender();
+        $callSender = PDK2021Wrapper::$pdkCore->getVeriCodeCallSender();
+        if($emailSender === null or !$emailSender->supportsNotificationAndSalesMsg()){
+            $emailSender = null;
+        }
+        if($smsSender === null or !$smsSender->supportsNotificationAndSalesMsg()){
+            $smsSender = null;
+        }
+        if($callSender === null or !$callSender->supportsNotificationAndSalesMsg()){
+            $callSender = null;
+        }
+        if(empty($preferredSendMethod) || !is_int($preferredSendMethod) || !SentMethod::isSentMethodValid($preferredSendMethod)){
+            $preferredSendMethod = SentMethod::SMS_MESSAGE;
+        }else{
+            $preferredSendMethod = intval($preferredSendMethod);
+        }
+
+        $actualSender = null;
+        $totalLoopTime = 0;
+        $actualDest = null;
+        while($actualSendingMethod === SentMethod::NOT_SENT){
+            if($preferredSendMethod === SentMethod::EMAIL){
+                if($emailSender === null || empty($user->getEmail()) || !$user->isEmailVerified()){
+                    $preferredSendMethod = SentMethod::SMS_MESSAGE;
+                }else{
+                    $actualSender = $emailSender;
+                    $actualSendingMethod = SentMethod::EMAIL;
+                    $actualDest = $user->getEmail();
+                    break;
+                }
+            }else if($preferredSendMethod === SentMethod::SMS_MESSAGE){
+                if($smsSender === null || empty($user->getPhoneNumber()) || !$user->isPhoneVerified()){
+                    $preferredSendMethod = SentMethod::PHONE_CALL;
+                }else{
+                    $actualSender = $smsSender;
+                    $actualSendingMethod = SentMethod::SMS_MESSAGE;
+                    $actualDest = $user->getPhoneNumber();
+                    break;
+                }
+            }else if($preferredSendMethod === SentMethod::PHONE_CALL){
+                if($callSender === null || empty($user->getPhoneNumber()) || !$user->isPhoneVerified()){
+                    $preferredSendMethod = SentMethod::EMAIL;
+                }else{
+                    $actualSender = $callSender;
+                    $actualSendingMethod = SentMethod::PHONE_CALL;
+                    $actualDest = $user->getPhoneNumber();
+                    break;
+                }
+            }else{
+                $preferredSendMethod = SentMethod::EMAIL;
+            }
+
+            $totalLoopTime++;
+            if($totalLoopTime >= 4){
+                //Error! None of the methods are available
+                return new SendVeriCodeResponse(false,ReturnableResponse::fromItemNotFound('communication_method'),SentMethod::NOT_SENT);
+            }
+        }
+
+        //Let's send this message!
+        try{
+            if($isNotification){
+                $actualSender->sendThirdAPPNotification($user,$maskID,$relatedAPP,$APPToken,$actualDest,$title,$content,$locale);
+            }else{
+                $actualSender->sendThirdAPPSaleMsg($user,$maskID,$relatedAPP,$APPToken,$actualDest,$title,$content,$locale);
+            }
+        }catch(PDKSenderServiceError $e){
+            return new SendVeriCodeResponse(false,ReturnableResponse::fromPDKException($e));
         }
 
         return new SendVeriCodeResponse(true,null,$actualSendingMethod);

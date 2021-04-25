@@ -45,4 +45,26 @@ class WrapperEmailContent implements EmailTemplateProvider{
         }
         return $content;
     }
+    public function getOAuthNotificationTemplate(?string $locale = null): string
+    {
+        $path = self::BASIC_DIR . $locale . '/EmailThirdAPPNotification.html';
+        $content = '';
+        if(is_file($path)){
+            $content = file_get_contents($path);
+        }else{
+            $content = file_get_contents(self::BASIC_DIR . '/zh_CN/EmailThirdAPPNotification.html');
+        }
+        return $content;
+    }
+    public function getOAuthSaleMsgTemplate(?string $locale = null): string
+    {
+        $path = self::BASIC_DIR . $locale . '/EmailThirdAPPSaleMsg.html';
+        $content = '';
+        if(is_file($path)){
+            $content = file_get_contents($path);
+        }else{
+            $content = file_get_contents(self::BASIC_DIR . '/zh_CN/EmailThirdAPPSaleMsg.html');
+        }
+        return $content;
+    }
 }

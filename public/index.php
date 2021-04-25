@@ -132,5 +132,6 @@ $app->get('/oauth_token/verified_status',AccessCodeController::class . ':verifyA
 $app->get('/oauth_token/refresh_result', AccessCodeController::class . ':refreshAPPToken');
 
 $app->get('/oauth_ability/user_info',APPAbilityController::class . ':getBasicInfo');
+$app->post('/oauth_ability/notifications',APPAbilityController::class . ':sendNotification');
 
 $app->run();

@@ -48,12 +48,14 @@ class PDK2021Wrapper{
             new AliyunServiceProvider($config->ALIYUN_ACCESS_KEY_ID,$config->ALIYUN_ACCESS_KEY_SECRET),
             new TemplateEmailContentGenerator(new TemplateProviderWrapperEmailContent(),new LinkProvider(),'InteractivePDK'),
             new MultiLangValueProvider($config->ALIYUN_FROM_NAME,array()),
-            $config->ALIYUN_FROM_ADDR
+            $config->ALIYUN_FROM_ADDR,
+            true
         );
         $SMSSender = new VeriCodeSMSSenderImplWithService(
             new DXTonServiceProvider($config->DXTON_USERNAME,$config->DXTON_APISecret,'utf8',false),
             new DXTonTemplateContentProvider,
-            null
+            null,
+            true
         );
 
         self::$pdkCore = new PDKCore(
