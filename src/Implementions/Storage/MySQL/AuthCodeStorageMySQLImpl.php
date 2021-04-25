@@ -193,7 +193,7 @@ class AuthCodeStorageMySQLImpl extends AuthCodeStorage implements MySQLStorageIm
             0
         );
     }
-    public function getAPPEntityCount(?string $authCode = null, int $createTimeStart = -1, int $createTimeEnd = -1, int $expireTimeStart = -1, int $expireTimeEnd = -1, ?string $relatedMaskID = null, int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID) : int{
+    public function getAuthCodeEntityCount(?string $authCode = null, int $createTimeStart = -1, int $createTimeEnd = -1, int $expireTimeStart = -1, int $expireTimeEnd = -1, ?string $relatedMaskID = null, int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID) : int{
         if(!empty($authCode)){
             $this->db->where('auth_code','%' . $authCode . '%', 'LIKE');
         }
@@ -220,5 +220,35 @@ class AuthCodeStorageMySQLImpl extends AuthCodeStorage implements MySQLStorageIm
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
         return $count;
+    }
+    public function clearAuthCode(?string $authCode = null, int $createTimeStart = -1, int $createTimeEnd = -1, int $expireTimeStart = -1, int $expireTimeEnd = -1, ?string $relatedMaskID = null, int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, int $dataOffset = 0, int $dataCountLimit = -1): void
+    {
+        if(!empty($authCode)){
+            $this->db->where('auth_code','%' . $authCode . '%', 'LIKE');
+        }
+        if($createTimeStart >= 0){
+            $this->db->where('create_time',$createTimeStart,'>=');
+        }
+        if($createTimeEnd >= 0){
+            $this->db->where('create_time',$createTimeEnd,'<=');
+        }
+        if($expireTimeStart >= 0){
+            $this->db->where('expire_time',$expireTimeStart,'>=');
+        }
+        if($expireTimeEnd >= 0){
+            $this->db->where('expire_time',$expireTimeEnd,'<=');
+        }
+        if(!empty($relatedMaskID)){
+            $this->db->where('mask_id',$relatedMaskID);
+        }
+        if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
+            $this->db->where('appuid',$relatedAPPUID);
+        }
+        $dataLimit = null;
+        if($dataCountLimit != -1){
+            $dataLimit = array($dataOffset, $dataCountLimit);            
+        }
+        $result = $this->db->delete('oauth_codes',$dataLimit);
+        return;
     }
 }

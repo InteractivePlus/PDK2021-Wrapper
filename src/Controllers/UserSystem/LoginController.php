@@ -162,9 +162,11 @@ class LoginController{
             return ReturnableResponse::fromPDKException($e)->toResponse($response);
         }
         
-        $TokenEntity->valid = false;
+        
+        //$TokenEntity->valid = false;
         try{
-            $TokenEntityStorage->updateTokenEntity($TokenEntity);
+            //$TokenEntityStorage->updateTokenEntity($TokenEntity);
+            $TokenEntityStorage->setTokenEntityInvalid($TokenEntity->getTokenStr());
         }catch(PDKStorageEngineError $e){
             return ReturnableResponse::fromPDKException($e)->toResponse($response);
         }

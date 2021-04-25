@@ -196,4 +196,42 @@ class MaskIDFunctionController{
         $returnResponse->returnDataLevelEntries['mask'] = $outputMaskIDArray;
         return $returnResponse->toResponse($response);
     }
+    public function deleteMaskID(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = json_decode($request->getBody(),true);
+        $REQ_MASKID = $args['mask_id'];
+        $REQ_UID = $REQ_PARAMS['uid'];
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
+        $ctime = time();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+
+    
+        if(empty($REQ_MASKID) || !is_string($REQ_MASKID) || !MaskIDFormat::isValidMaskID($REQ_MASKID)){
+            return ReturnableResponse::fromIncorrectFormattedParam('mask_id')->toResponse($response);
+        }
+
+        $checkLoginStatusState = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+        if($checkLoginStatusState !== null){
+            return $checkLoginStatusState->toResponse($response);
+        }
+
+        $MaskIDStorage = PDK2021Wrapper::$pdkCore->getMaskIDEntityStorage();
+        $MaskIDEntity = $MaskIDStorage->getMaskIDEntityByMaskID($REQ_MASKID);
+        if($MaskIDEntity === null){
+            return ReturnableResponse::fromPermissionDeniedError('This is not your mask_id')->toResponse($response);
+        }
+        if($MaskIDEntity->uid !== intval($REQ_UID)){
+            return ReturnableResponse::fromPermissionDeniedError('This is not your mask_id')->toResponse($response);
+        }
+        //Fetch AuthCode and AccessCode Lib, Delete all related tokens
+        $AuthCodeStorage = PDK2021Wrapper::$pdkCore->getAPPAuthCodeStorage();
+        $APPTokenStorage = PDK2021Wrapper::$pdkCore->getAPPTokenEntityStorage();
+        $AuthCodeStorage->clearAuthCode(null,-1,-1,-1,-1,$MaskIDEntity->getMaskID(),APPSystemConstants::NO_APP_RELATED_APPUID);
+        $APPTokenStorage->clearAPPToken(0,0,0,0,0,0,0,0,$MaskIDEntity->getMaskID(),APPSystemConstants::NO_APP_RELATED_APPUID);
+
+        //delete MaskID from DB
+        $MaskIDStorage->deleteMaskID($MaskIDEntity->getMaskID());
+
+        $returnResponse = new ReturnableResponse(204,0);
+        return $returnResponse->toResponse($response);
+    }
 }

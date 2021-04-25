@@ -119,10 +119,13 @@ $app->get('/masks/{client_id}',MaskIDFunctionController::class . ':listOwnedMask
 $app->get('/masks',MaskIDFunctionController::class . ':listOwnedMaskIDs');
 $app->post('/masks/{client_id}',MaskIDFunctionController::class . ':createMaskID');
 $app->patch('/masks/{mask_id}',MaskIDFunctionController::class . ':modifyMaskID');
+$app->delete('/masks/{mask_id}',MaskIDFunctionController::class . ':deleteMaskID');
 
 $app->get('/authcode',AuthCodeController::class . ':getAuthCode');
 
 $app->post('/oauth_token',AccessCodeController::class . ':createAccessCode');
 $app->get('/oauth_token/verified_status',AccessCodeController::class . ':verifyAccessCode');
+$app->get('/oauth_token/refresh_result', AccessCodeController::class . ':refreshAPPToken');
+
 
 $app->run();

@@ -149,9 +149,6 @@ class CommonFunction{
         if((!empty($client_id) && !APPFormat::isAPPIDStringEqual($fetchedTokenEntity->getClientID(),$client_id)) || (!empty($mask_id) && !MaskIDFormat::isMaskIDStringEqual($fetchedTokenEntity->getMaskID(),$mask_id))){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromCredentialMismatchError('access_token'),null);
         }
-        if(!$fetchedTokenEntity->valid || $currentTime >= $fetchedTokenEntity->expireTime){
-            return new CheckAPPTokenResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('access_token'),$fetchedTokenEntity);
-        }
         if(!$fetchedTokenEntity->getObtainedMethod() === APPTokenObtainedMethod::GRANTTYPE_WITH_SECRET_AUTH_CODE){
             $APPEntity = $appEntityStorage->getAPPEntityByAPPUID($fetchedTokenEntity->appuid);
             if($APPEntity === null){
@@ -160,6 +157,9 @@ class CommonFunction{
             if(!$APPEntity->checkClientSecret($client_secret)){
                 return new CheckAPPTokenResponse(false,ReturnableResponse::fromCredentialMismatchError('client_secret'),$fetchedTokenEntity);
             }
+        }
+        if(!$fetchedTokenEntity->valid || $currentTime >= $fetchedTokenEntity->expireTime){
+            return new CheckAPPTokenResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('access_token'),$fetchedTokenEntity);
         }
         return new CheckAPPTokenResponse(true,null,$fetchedTokenEntity);
     }

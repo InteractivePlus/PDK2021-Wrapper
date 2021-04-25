@@ -233,22 +233,22 @@ class APPTokenStorageMySQLImpl extends APPTokenEntityStorage implements MySQLSto
         if($issueTimeMax > 0){
             $this->db->where('issue_time',$issueTimeMax,'<=');
         }
-        if($expireTimeMin >= 0){
+        if($expireTimeMin > 0){
             $this->db->where('expire_time',$expireTimeMin,'>=');
         }
-        if($expireTimeMax >= 0){
+        if($expireTimeMax > 0){
             $this->db->where('expire_time',$expireTimeMax,'<=');
         }
-        if($lastRenewTimeMin >= 0){
+        if($lastRenewTimeMin > 0){
             $this->db->where('last_renew_time',$lastRenewTimeMin,'>=');
         }
-        if($lastRenewTimeMax >= 0){
+        if($lastRenewTimeMax > 0){
             $this->db->where('last_renew_time',$lastRenewTimeMax,'<=');
         }
-        if($refreshExpireMin >= 0){
+        if($refreshExpireMin > 0){
             $this->db->where('refresh_expire_time',$refreshExpireMin,'>=');
         }
-        if($refreshExpireMax >= 0){
+        if($refreshExpireMax > 0){
             $this->db->where('refresh_expire_time',$refreshExpireMax,'<=');
         }
         if(!empty($maskID)){

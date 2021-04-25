@@ -85,7 +85,7 @@ class AccessCodeController{
             APPFormat::generateAPPAccessToken(),
             APPFormat::generateAPPRefreshToken(),
             $ctime,
-            $ctime + PDK2021Wrapper::$config->OAUTH_AUTHCODE_AVAILABLE_DURATION,
+            $ctime + PDK2021Wrapper::$config->OAUTH_TOKEN_AVAILABLE_DURATION,
             $ctime,
             $ctime + PDK2021Wrapper::$config->OAUTH_REFRESH_TOKEN_AVAILABLE_DURATION,
             $AuthCodeEntity->getMaskID(),
@@ -95,6 +95,9 @@ class AccessCodeController{
             $AuthCodeEntity->scopes,
             true
         );
+
+        //Clear other token with same APPUID and same MaskID
+        $OAuthTokenStorage->clearAPPToken(0,0,$ctime,0,0,0,0,0,$AuthCodeEntity->getMaskID(),$APPEntity->getAPPUID());
 
         //Save APPToken To DB
         $returnedAPPTokenEntity = $OAuthTokenStorage->addAPPTokenEntity($createdAPPTokenEntity,true,true);
@@ -135,5 +138,82 @@ class AccessCodeController{
         $returnResponse = new ReturnableResponse(200,0);
         $returnResponse->returnDataLevelEntries['token'] = APPTokenOutputUtil::getAPPTokenAsAssocArray($verifyAccessCodeState->tokenEntity);
         return $returnResponse->toResponse($response);
+    }
+    public function refreshAPPToken(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REQ_REFRESH_TOKEN = $REQ_PARAMS['refresh_token'];
+        $REQ_CLIENT_ID = $REQ_PARAMS['client_id'];
+        $REQ_CLIENT_SECRET = $REQ_PARAMS['client_secret'];
+        $REMOTE_ADDR = $request->getAttribute('ip');
+        $ctime = time();
+        if(empty($REQ_REFRESH_TOKEN) || !is_string($REQ_REFRESH_TOKEN) || !APPFormat::isValidAPPRefreshToken($REQ_REFRESH_TOKEN)){
+            return ReturnableResponse::fromIncorrectFormattedParam('refresh_token')->toResponse($response);
+        }
+        if(empty($REQ_CLIENT_ID) || !is_string($REQ_CLIENT_ID) || !APPFormat::isValidAPPID($REQ_CLIENT_ID)){
+            return ReturnableResponse::fromIncorrectFormattedParam('client_id')->toResponse($response);
+        }
+        if(!empty($REQ_CLIENT_SECRET) && (!is_string($REQ_CLIENT_SECRET) || !APPFormat::isValidAPPSecert($REQ_CLIENT_SECRET))){
+            return ReturnableResponse::fromIncorrectFormattedParam('client_secret')->toResponse($response);
+        }
+        $APPTokenEntityStorage = PDK2021Wrapper::$pdkCore->getAPPTokenEntityStorage();
+        $APPTokenEntity = $APPTokenEntityStorage->getAPPTokenEntitybyRefreshToken($REQ_REFRESH_TOKEN);
+        if($APPTokenEntity === null){
+            return ReturnableResponse::fromCredentialMismatchError('refresh_token')->toResponse($response);
+        }
+
+        //Check if ClientID matches
+        if(!APPFormat::isAPPIDStringEqual($APPTokenEntity->getClientID(), $REQ_CLIENT_ID)){
+            return ReturnableResponse::fromCredentialMismatchError('refresh_token')->toResponse($response);
+        }
+
+        //Fetch the Type of the Grant, see if we need to confirm the ClientSecret
+        if($APPTokenEntity->getObtainedMethod() === APPTokenObtainedMethod::GRANTTYPE_WITH_SECRET_AUTH_CODE){
+            //Check ClientSecret
+            $APPEntityStorage = PDK2021Wrapper::$pdkCore->getAPPEntityStorage();
+            $APPEntity = $APPEntityStorage->getAPPEntityByClientID($REQ_CLIENT_ID);
+            if($APPEntity === null){
+                return ReturnableResponse::fromInnerError('Cannot find APP with an issued APPToken')->toResponse($response);
+            }
+            if(empty($REQ_CLIENT_SECRET) || !$APPEntity->checkClientSecret($REQ_CLIENT_SECRET)){
+                return ReturnableResponse::fromCredentialMismatchError('client_secret')->toResponse($response);
+            }
+        }
+
+        //Check if the Token Object has expired
+        if(!$APPTokenEntity->valid || $ctime >= $APPTokenEntity->refreshExpireTime){
+            return ReturnableResponse::fromItemExpiredOrUsedError('refresh_token')->toResponse($response);
+        }
+
+        //Great, Everything's checked, now let's issue a new APPToken
+        $createdAPPToken = new APPTokenEntity(
+            APPFormat::generateAPPAccessToken(),
+            APPFormat::generateAPPRefreshToken(),
+            $APPTokenEntity->issueTime,
+            $ctime + PDK2021Wrapper::$config->OAUTH_TOKEN_AVAILABLE_DURATION,
+            $ctime,
+            $ctime + PDK2021Wrapper::$config->OAUTH_REFRESH_TOKEN_AVAILABLE_DURATION,
+            $APPTokenEntity->getMaskID(),
+            $APPTokenEntity->appuid,
+            $APPTokenEntity->getClientID(),
+            $APPTokenEntity->getObtainedMethod(),
+            $APPTokenEntity->scopes,
+            true
+        );
+
+        //Put Generated Token Into DB
+        $returnedAPPToken = $APPTokenEntityStorage->addAPPTokenEntity($createdAPPToken,true,true);
+        if($returnedAPPToken === null){
+            return ReturnableResponse::fromInnerError('Unknown error happened when trying to put created APPToken into DB')->toResponse($response);
+        }
+
+        //disable previous token
+        //$APPTokenEntity->valid = false;
+        //$APPTokenEntityStorage->updateAPPTokenEntity($APPTokenEntity);
+        $APPTokenEntityStorage->setAPPTokenEntityInvalid($APPTokenEntity->getAccessToken());
+
+        //return new token
+        $returnRepsonse = new ReturnableResponse(200,0);
+        $returnRepsonse->returnDataLevelEntries['token'] = APPTokenOutputUtil::getAPPTokenAsAssocArray($returnedAPPToken);
+        return $returnRepsonse->toResponse($response);
     }
 }
