@@ -43,9 +43,9 @@ class Config{
 
     public bool $DEVELOPMENT_MODE = true;
     public array $FRONTEND_ROOT_URL_FOR_CORS = array(
+        'http://pdk.xsyds.cn/',
+        'https://user.xsyds.cn/',
         'http://pdk.interactiveplus.org/',
-        'https://pdk.interactiveplus.org/',
-        'http://user.interactiveplus.org/',
         'https://user.interactiveplus.org/'
     );
 
