@@ -2,12 +2,14 @@
 namespace InteractivePlus\PDK2021\Controllers\OAuthSystem;
 
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
+use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\OutputUtils\APPTokenOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenEntity;
 use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenObtainedMethod;
 use InteractivePlus\PDK2021Core\APP\AuthCode\AuthCodeChallengeType;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
+use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -102,6 +104,36 @@ class AccessCodeController{
 
         $returnResponse = new ReturnableResponse(201,0);
         $returnResponse->returnDataLevelEntries['token'] = APPTokenOutputUtil::getAPPTokenAsAssocArray($returnedAPPTokenEntity);
+        return $returnResponse->toResponse($response);
+    }
+    public function verifyAccessCode(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REQ_ACCESS_CODE = $REQ_PARAMS['access_token'];
+        $REQ_CLIENT_ID = $REQ_PARAMS['client_id'];
+        $REQ_CLIENT_SECRET = $REQ_PARAMS['client_secret'];
+        $REQ_MASK_ID = $REQ_PARAMS['mask_id'];
+        $ctime = time();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+        if(empty($REQ_ACCESS_CODE) || !is_string($REQ_ACCESS_CODE) || !APPFormat::isValidAPPAccessToken($REQ_ACCESS_CODE)){
+            return ReturnableResponse::fromIncorrectFormattedParam('access_token')->toResponse($response);
+        }
+        if(empty($REQ_CLIENT_ID) || !is_string($REQ_CLIENT_ID) || !APPFormat::isValidAPPID($REQ_CLIENT_ID)){
+            return ReturnableResponse::fromIncorrectFormattedParam('client_id')->toResponse($response);
+        }
+        if(!empty($REQ_CLIENT_SECRET) && (!is_string($REQ_CLIENT_SECRET) || !APPFormat::isValidAPPSecert($REQ_CLIENT_SECRET))){
+            return ReturnableResponse::fromIncorrectFormattedParam('client_secret')->toResponse($response);
+        }
+        if(empty($REQ_MASK_ID) || !is_string($REQ_MASK_ID) || !MaskIDFormat::isValidMaskID($REQ_MASK_ID)){
+            return ReturnableResponse::fromIncorrectFormattedParam('mask_id')->toResponse($response);
+        }
+        //try get access code
+        $verifyAccessCodeState = CommonFunction::checkAPPTokenValidResponse($REQ_ACCESS_CODE,$ctime,$REQ_CLIENT_ID,$REQ_CLIENT_SECRET,$REQ_MASK_ID);
+        if(!$verifyAccessCodeState->succeed){
+            return $verifyAccessCodeState->returnableResponse->toResponse($response);
+        }
+
+        $returnResponse = new ReturnableResponse(200,0);
+        $returnResponse->returnDataLevelEntries['token'] = APPTokenOutputUtil::getAPPTokenAsAssocArray($verifyAccessCodeState->tokenEntity);
         return $returnResponse->toResponse($response);
     }
 }

@@ -123,5 +123,6 @@ $app->patch('/masks/{mask_id}',MaskIDFunctionController::class . ':modifyMaskID'
 $app->get('/authcode',AuthCodeController::class . ':getAuthCode');
 
 $app->post('/oauth_token',AccessCodeController::class . ':createAccessCode');
+$app->get('/oauth_token/verified_status',AccessCodeController::class . ':verifyAccessCode');
 
 $app->run();

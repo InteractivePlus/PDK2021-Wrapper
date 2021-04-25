@@ -4,6 +4,7 @@ namespace InteractivePlus\PDK2021\GatewayFunctions;
 
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenObtainedMethod;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\APP\Formats\MaskIDFormat;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
@@ -121,18 +122,22 @@ class CommonFunction{
         }
         return new CheckVericodeResponse(true,null,$veriCodeEntity);
     }
-    public static function checkAPPTokenValidResponse($access_token, $client_id, $mask_id, int $currentTime) : checkAPPTokenResponse{
+    public static function checkAPPTokenValidResponse($access_token,int $currentTime, $client_id, $client_secret, $mask_id) : checkAPPTokenResponse{
         if(empty($access_token) || !is_string($access_token) || !APPFormat::isValidAPPAccessToken($access_token)){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromIncorrectFormattedParam('access_token'),null);
         }
-        if(empty($client_id) || !is_string($client_id) || !APPFormat::isValidAPPID($client_id)){
-            return new CheckAPPTokenResponse(false,ReturnableResponse::fromIncorrectFormattedParam('appuid'),null);
+        if(!empty($client_id) && (!is_string($client_id) || !APPFormat::isValidAPPID($client_id))){
+            return new CheckAPPTokenResponse(false,ReturnableResponse::fromIncorrectFormattedParam('client_id'),null);
         }
-        if(empty($mask_id) || !is_string($mask_id) || !MaskIDFormat::isValidMaskID($mask_id)){
+        if(!empty($client_secret) && (!is_string($client_secret) || !APPFormat::isValidAPPSecert($client_secret))){
+            return new CheckAPPTokenResponse(false,ReturnableResponse::fromIncorrectFormattedParam('client_secret'),null);
+        }
+        if(!empty($mask_id) && (!is_string($mask_id) || !MaskIDFormat::isValidMaskID($mask_id))){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromIncorrectFormattedParam('mask_id'),null);
         }
         $fetchedTokenEntity = null;
         $appTokenEntityStorage = PDK2021Wrapper::$pdkCore->getAPPTokenEntityStorage();
+        $appEntityStorage = PDK2021Wrapper::$pdkCore->getAPPEntityStorage();
         try{
             $fetchedTokenEntity = $appTokenEntityStorage->getAPPTokenEntity($access_token);
             if($fetchedTokenEntity === null){
@@ -141,11 +146,20 @@ class CommonFunction{
         }catch(PDKStorageEngineError $e){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromPDKException($e),null);
         }
-        if(!APPFormat::isAPPIDStringEqual($fetchedTokenEntity->getClientID(),$client_id) || !MaskIDFormat::isMaskIDStringEqual($fetchedTokenEntity->getMaskID(),$mask_id)){
+        if((!empty($client_id) && !APPFormat::isAPPIDStringEqual($fetchedTokenEntity->getClientID(),$client_id)) || (!empty($mask_id) && !MaskIDFormat::isMaskIDStringEqual($fetchedTokenEntity->getMaskID(),$mask_id))){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromCredentialMismatchError('access_token'),null);
         }
         if(!$fetchedTokenEntity->valid || $currentTime >= $fetchedTokenEntity->expireTime){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromItemExpiredOrUsedError('access_token'),$fetchedTokenEntity);
+        }
+        if(!$fetchedTokenEntity->getObtainedMethod() === APPTokenObtainedMethod::GRANTTYPE_WITH_SECRET_AUTH_CODE){
+            $APPEntity = $appEntityStorage->getAPPEntityByAPPUID($fetchedTokenEntity->appuid);
+            if($APPEntity === null){
+                return new CheckAPPTokenResponse(false,ReturnableResponse::fromInnerError('Cannot find APP with an issued APPToken'),null);
+            }
+            if(!$APPEntity->checkClientSecret($client_secret)){
+                return new CheckAPPTokenResponse(false,ReturnableResponse::fromCredentialMismatchError('client_secret'),$fetchedTokenEntity);
+            }
         }
         return new CheckAPPTokenResponse(true,null,$fetchedTokenEntity);
     }
