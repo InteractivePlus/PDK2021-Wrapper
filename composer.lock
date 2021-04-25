@@ -1100,7 +1100,7 @@
             "description": "Core Library for InteractivePDK2021",
             "support": {
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
-                "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
+                "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/1.0.0A"
             },
             "time": "2021-04-25T11:41:05+00:00"
         },
