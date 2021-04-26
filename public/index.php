@@ -5,6 +5,7 @@ use InteractivePlus\PDK2021\Controllers\Captcha\SimpleCaptchaController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\AccessCodeController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\APPAbilityController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\AuthCodeController;
+use InteractivePlus\PDK2021\Controllers\OAuthSystem\EXT_StorageAbilityController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
@@ -133,5 +134,11 @@ $app->get('/oauth_token/refresh_result', AccessCodeController::class . ':refresh
 
 $app->get('/oauth_ability/user_info',APPAbilityController::class . ':getBasicInfo');
 $app->post('/oauth_ability/notifications',APPAbilityController::class . ':sendNotification');
+
+if(PDK2021Wrapper::$pdkCore->getEXTOAuthStorageRecordStorage() !== null){
+    $app->get('/oauth_ability/storage/is_record',EXT_StorageAbilityController::class . ':isDataPresent');
+    $app->get('/oauth_ability/storage/data',EXT_StorageAbilityController::class . ':getData');
+    $app->put('/oauth_ability/storage/data',EXT_StorageAbilityController::class . ':putData');
+}
 
 $app->run();

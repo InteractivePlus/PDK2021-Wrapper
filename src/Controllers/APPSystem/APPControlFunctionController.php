@@ -6,6 +6,7 @@ use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\OutputUtils\APPOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\APP\APPInfo\APPEntity;
+use InteractivePlus\PDK2021Core\APP\APPInfo\APPPermission;
 use InteractivePlus\PDK2021Core\APP\APPInfo\PDKAPPType;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\Base\Constants\APPSystemConstants;
@@ -59,7 +60,8 @@ class APPControlFunctionController{
             '',
             $ctime,
             $REQ_UID,
-            $APPFormat
+            $APPFormat,
+            new APPPermission()
         );
 
         try{

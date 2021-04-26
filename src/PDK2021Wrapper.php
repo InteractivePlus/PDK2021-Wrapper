@@ -9,6 +9,7 @@ use InteractivePlus\PDK2021\Implementions\Sender\LocalFileSMSServiceProvider;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\APPEntityStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\APPTokenStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\AuthCodeStorageMySQLImpl;
+use InteractivePlus\PDK2021\Implementions\Storage\MySQL\EXTOAuthStorageRecordStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\MaskIDStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\SimpleCaptchaStorageMySQLImpl;
@@ -42,7 +43,7 @@ class PDK2021Wrapper{
         $APPTokenStorage = new APPTokenStorageMySQLImpl($mySQLConn);
         $MaskIDStorage = new MaskIDStorageMySQLImpl($mySQLConn);
         $captchaSystem = new PDKSimpleCaptchaSystemImpl($config->CAPTCHA_AVAILABLE_DURATION,new SimpleCaptchaStorageMySQLImpl($mySQLConn,$config->CAPTCHA_PHRASE_LEN));
-
+        $EXTOAuthStorageRecordStorage = new EXTOAuthStorageRecordStorageMySQLImpl($mySQLConn);
 
         $EmailSender = new VeriCodeEmailSenderImplWithProvider(
             new AliyunServiceProvider($config->ALIYUN_ACCESS_KEY_ID,$config->ALIYUN_ACCESS_KEY_SECRET),
@@ -70,7 +71,8 @@ class PDK2021Wrapper{
             $APPEntityStorage,
             $APPTokenStorage,
             $AuthCodeStorage,
-            $MaskIDStorage
+            $MaskIDStorage,
+            $EXTOAuthStorageRecordStorage
         );
     }
     public static function installDB() : void{
@@ -88,6 +90,7 @@ class PDK2021Wrapper{
         $AuthCodeStorage = new AuthCodeStorageMySQLImpl($mySQLConn);
         $APPTokenStorage = new APPTokenStorageMySQLImpl($mySQLConn);
         $MaskIDStorage = new MaskIDStorageMySQLImpl($mySQLConn);
+        $EXTOAuthStorageRecordStorage = new EXTOAuthStorageRecordStorageMySQLImpl($mySQLConn);
         
         $LoggerStorage->createTables();
         $VeriCodeStorage->createTables();
@@ -98,6 +101,8 @@ class PDK2021Wrapper{
         $AuthCodeStorage->createTables();
         $APPTokenStorage->createTables();
         $MaskIDStorage->createTables();
+        $EXTOAuthStorageRecordStorage->createTables();
+        
 
         $mySQLConn->disconnect();
     }

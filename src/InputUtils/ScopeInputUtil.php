@@ -1,8 +1,7 @@
 <?php
 namespace InteractivePlus\PDK2021\InputUtils;
 
-use InteractivePlus\PDK2021\OAuth\OAuthScope;
-use InteractivePlus\PDK2021\OAuth\OAuthScopes;
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenScopes;
 
 class ScopeInputUtil{
     public static function parseScopeArray(string $passedScopes) : array{
@@ -12,7 +11,7 @@ class ScopeInputUtil{
             $seperatedBySpace = explode(' ',$seperateCommaSingle);
             foreach($seperatedBySpace as $seperateSpaceSingle){
                 $currentScope = strtolower(trim($seperateSpaceSingle));
-                if(OAuthScopes::isValidScope($currentScope) && !in_array($currentScope,$results)){
+                if(APPTokenScopes::isValidScope($currentScope) && !in_array($currentScope,$results)){
                     $results[] = $currentScope;
                 }
             }

@@ -3,6 +3,7 @@ namespace InteractivePlus\PDK2021\Implementions\Storage\MySQL;
 
 use InteractivePlus\PDK2021Core\APP\APPInfo\APPEntity;
 use InteractivePlus\PDK2021Core\APP\APPInfo\APPEntityStorage;
+use InteractivePlus\PDK2021Core\APP\APPInfo\APPPermission;
 use InteractivePlus\PDK2021Core\APP\APPSystemFormatSetting;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
 use InteractivePlus\PDK2021Core\Base\Constants\UserSystemConstants;
@@ -37,6 +38,7 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
                 `redirect_uri` TINYTEXT NOT NULL,
                 `create_time` INT UNSIGNED NOT NULL,
                 `owner_uid` INT UNSIGNED NOT NULL,
+                `permission` TINYBLOB NOT NULL,
                 PRIMARY KEY ( `appuid` )
             )ENGINE=InnoDB CHARSET=utf8;"
         );
@@ -73,7 +75,8 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             'client_type' => $entity->getClientType(),
             'redirect_uri' => strlen($entity->redirectURI) > 255 ? substr($entity->redirectURI,0,255) : $entity->redirectURI,
             'create_time' => $entity->createTime,
-            'owner_uid' => $entity->ownerUID
+            'owner_uid' => $entity->ownerUID,
+            'permission' => serialize($entity->getPermission()->toAssocArray())
         );
         $insertResult = $this->db->insert('app_infos',$dataToInsert);
         if(!$insertResult){
@@ -93,7 +96,8 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             'client_type' => $entity->getClientType(),
             'redirect_uri' => strlen($entity->redirectURI) > 255 ? substr($entity->redirectURI,0,255) : $entity->redirectURI,
             'create_time' => $entity->createTime,
-            'owner_uid' => $entity->ownerUID
+            'owner_uid' => $entity->ownerUID,
+            'permission' => serialize($entity->getPermission()->toAssocArray())
         );
         $this->db->where('appuid',$entity->getAPPUID());
         $result = $this->db->update('app_infos',$dataToUpdate, 1);
@@ -112,7 +116,8 @@ class APPEntityStorageMySQLImpl extends APPEntityStorage implements MySQLStorage
             $dataRow['redirect_uri'],
             $dataRow['create_time'],
             $dataRow['owner_uid'],
-            $this->getFormatSetting()
+            $this->getFormatSetting(),
+            APPPermission::fromAssocArray(unserialize($dataRow['permission']))
         );
         return $newEntity;
     }

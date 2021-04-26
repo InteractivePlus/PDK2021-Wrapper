@@ -3,10 +3,9 @@ namespace InteractivePlus\PDK2021\Controllers\OAuthSystem;
 
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
-use InteractivePlus\PDK2021\OAuth\OAuthScope;
-use InteractivePlus\PDK2021\OAuth\OAuthScopes;
 use InteractivePlus\PDK2021\OutputUtils\MaskIDOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenScopes;
 use InteractivePlus\PDK2021Core\Communication\CommunicationMethods\SentMethod;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -17,9 +16,9 @@ class APPAbilityController{
         $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token'];
         $ctime = time();
         $REMOTE_ADDR = $request->getAttribute('ip');
-        $ScopeRequired = OAuthScopes::SCOPE_BASIC_INFO()->getScopeName();
+        $ScopeRequired = APPTokenScopes::SCOPE_BASIC_INFO()->getScopeName();
 
-        $VerifyScopeAndTokenResult = CommonFunction::checkAPPTokenValidAndScopeSatisfiedResponse($REQ_ACCESS_TOKEN,$ScopeRequired,$ctime,null,null,null);
+        $VerifyScopeAndTokenResult = CommonFunction::checkAPPTokenValidAndScopeSatisfiedResponse($REQ_ACCESS_TOKEN,$ScopeRequired,$ctime);
         if(!$VerifyScopeAndTokenResult->succeed){
             return $VerifyScopeAndTokenResult->returnableResponse->toResponse($response);
         }
@@ -53,9 +52,9 @@ class APPAbilityController{
             $REQ_IS_SALES = false;
         }
 
-        $ScopeRequired = $REQ_IS_SALES ? OAuthScopes::SCOPE_SEND_SALES()->getScopeName() : OAuthScopes::SCOPE_SEND_NOTIFICATIONS()->getScopeName();
+        $ScopeRequired = $REQ_IS_SALES ? APPTokenScopes::SCOPE_SEND_SALES()->getScopeName() : APPTokenScopes::SCOPE_SEND_NOTIFICATIONS()->getScopeName();
 
-        $VerifyScopeAndTokenResult = CommonFunction::checkAPPTokenValidAndScopeSatisfiedResponse($REQ_ACCESS_TOKEN,$ScopeRequired,$ctime,null,null,null);
+        $VerifyScopeAndTokenResult = CommonFunction::checkAPPTokenValidAndScopeSatisfiedResponse($REQ_ACCESS_TOKEN,$ScopeRequired,$ctime);
         if(!$VerifyScopeAndTokenResult->succeed){
             return $VerifyScopeAndTokenResult->returnableResponse->toResponse($response);
         }

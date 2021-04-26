@@ -4,9 +4,8 @@ namespace InteractivePlus\PDK2021\Controllers\OAuthSystem;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
 use InteractivePlus\PDK2021\InputUtils\ScopeInputUtil;
-use InteractivePlus\PDK2021\OAuth\OAuthScope;
-use InteractivePlus\PDK2021\OAuth\OAuthScopes;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
+use InteractivePlus\PDK2021Core\APP\APPToken\APPTokenScopes;
 use InteractivePlus\PDK2021Core\APP\AuthCode\AuthCodeChallengeType;
 use InteractivePlus\PDK2021Core\APP\AuthCode\AuthCodeEntity;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
@@ -52,7 +51,7 @@ class AuthCodeController{
             return ReturnableResponse::fromIncorrectFormattedParam('scope')->toResponse($response);
         }
         $parsedScopes = ScopeInputUtil::parseScopeArray($REQ_SCOPES);
-        if(!in_array(OAuthScopes::SCOPE_BASIC_INFO()->getScopeName(),$parsedScopes)){
+        if(!in_array(APPTokenScopes::SCOPE_BASIC_INFO()->getScopeName(),$parsedScopes)){
             return ReturnableResponse::fromIncorrectFormattedParam('scope')->toResponse($response);
         }
 
@@ -67,6 +66,7 @@ class AuthCodeController{
             return ReturnableResponse::fromItemNotFound('client_id')->toResponse($response);
         }
 
+        $parsedScopes = $APPEntity->getPermission()->filterScopes($parsedScopes);
 
         //Fetch MaskID and see if it corresponds to this APP & this User
         $MaskID = $MaskIDEntityStorage->getMaskIDEntityByMaskID($REQ_MASK_ID);

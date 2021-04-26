@@ -126,7 +126,7 @@ class CommonFunction{
         }
         return new CheckVericodeResponse(true,null,$veriCodeEntity);
     }
-    public static function checkAPPTokenValidResponse($access_token,int $currentTime, $client_id, $client_secret, $mask_id) : checkAPPTokenResponse{
+    public static function checkAPPTokenValidResponse($access_token,int $currentTime, $client_id = null, $client_secret = null, $mask_id = null) : checkAPPTokenResponse{
         if(empty($access_token) || !is_string($access_token) || !APPFormat::isValidAPPAccessToken($access_token)){
             return new CheckAPPTokenResponse(false,ReturnableResponse::fromIncorrectFormattedParam('access_token'),null);
         }
@@ -167,7 +167,7 @@ class CommonFunction{
         }
         return new CheckAPPTokenResponse(true,null,$fetchedTokenEntity);
     }
-    public static function checkAPPTokenValidAndScopeSatisfiedResponse($access_token, string $scope, int $currentTime, $client_id, $client_secret, $mask_id) : CheckAPPTokenResponse{
+    public static function checkAPPTokenValidAndScopeSatisfiedResponse($access_token, string $scope, int $currentTime, $client_id = null, $client_secret = null, $mask_id = null) : CheckAPPTokenResponse{
         $checkTokenResponse = self::checkAPPTokenValidResponse($access_token,$currentTime,$client_id,$client_secret,$mask_id);
         if(!$checkTokenResponse->succeed){
             return $checkTokenResponse;

@@ -1067,19 +1067,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/InteractivePlus/PDK2021-CoreLib.git",
-                "reference": "d7c5387c8270f08d3f9a88b8b2ceacdd7dda2a02"
+                "reference": "1368ba75a17ba398be07dc8f26b566a01b90ae7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/d7c5387c8270f08d3f9a88b8b2ceacdd7dda2a02",
-                "reference": "d7c5387c8270f08d3f9a88b8b2ceacdd7dda2a02",
+                "url": "https://api.github.com/repos/InteractivePlus/PDK2021-CoreLib/zipball/1368ba75a17ba398be07dc8f26b566a01b90ae7d",
+                "reference": "1368ba75a17ba398be07dc8f26b566a01b90ae7d",
                 "shasum": ""
             },
             "require": {
                 "giggsey/libphonenumber-for-php": "^8",
                 "gregwar/captcha": "^1.1",
                 "interactiveplus/lib-i18n": "~1.0",
-                "php": ">=7.2.0",
+                "php": ">=7.4.0",
                 "phpmailer/phpmailer": "~6.1",
                 "psr/log": "~1.1"
             },
@@ -1102,7 +1102,7 @@
                 "issues": "https://github.com/InteractivePlus/PDK2021-CoreLib/issues",
                 "source": "https://github.com/InteractivePlus/PDK2021-CoreLib/tree/main"
             },
-            "time": "2021-04-25T14:13:29+00:00"
+            "time": "2021-04-26T08:13:41+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
