@@ -3,6 +3,7 @@ namespace InteractivePlus\PDK2021;
 
 use InteractivePlus\PDK2021Core\APP\APPSystemFormatSetting;
 use InteractivePlus\PDK2021Core\APP\APPSystemFormatSettingImpl;
+use InteractivePlus\PDK2021Core\EXT_Ticket\OAuthTicketFormatSettingImpl;
 use InteractivePlus\PDK2021Core\User\Setting\SettingBoolean;
 use InteractivePlus\PDK2021Core\User\Setting\UserSetting;
 use InteractivePlus\PDK2021Core\User\UserSystemFormatSettingImpl;
@@ -53,6 +54,8 @@ class Config{
     public int $OAUTH_NOTIFICATION_CONTENT_MAX_LEN = 200;
     public int $OAUTH_SALE_TITLE_MAX_LEN = 20;
     public int $OAUTH_SALE_CONTENT_MAX_LEN = 500;
+
+    public OAuthTicketFormatSettingImpl $OAUTH_TICKET_SYSTEM_FORMAT_CONSTRAINTS;
     public function __construct()
     {
         $this->USER_SYSTEM_CONSTRAINTS = new UserSystemFormatSettingImpl(
@@ -77,6 +80,15 @@ class Config{
             SettingBoolean::SET_NO
         );
         $this->APP_SYSTEM_FORMAT_CONSTRAINTS = new APPSystemFormatSettingImpl(
+            0,
+            25
+        );
+
+        $this->OAUTH_TICKET_SYSTEM_FORMAT_CONSTRAINTS = new OAuthTicketFormatSettingImpl(
+            0,
+            20,
+            0,
+            1000,
             0,
             25
         );

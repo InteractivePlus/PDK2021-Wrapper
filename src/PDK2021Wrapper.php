@@ -10,6 +10,7 @@ use InteractivePlus\PDK2021\Implementions\Storage\MySQL\APPEntityStorageMySQLImp
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\APPTokenStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\AuthCodeStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\EXTOAuthStorageRecordStorageMySQLImpl;
+use InteractivePlus\PDK2021\Implementions\Storage\MySQL\EXTOAuthTicketRecordStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\LoggerStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\MaskIDStorageMySQLImpl;
 use InteractivePlus\PDK2021\Implementions\Storage\MySQL\SimpleCaptchaStorageMySQLImpl;
@@ -44,6 +45,7 @@ class PDK2021Wrapper{
         $MaskIDStorage = new MaskIDStorageMySQLImpl($mySQLConn);
         $captchaSystem = new PDKSimpleCaptchaSystemImpl($config->CAPTCHA_AVAILABLE_DURATION,new SimpleCaptchaStorageMySQLImpl($mySQLConn,$config->CAPTCHA_PHRASE_LEN));
         $EXTOAuthStorageRecordStorage = new EXTOAuthStorageRecordStorageMySQLImpl($mySQLConn);
+        $EXTTicketRecordStorage = new EXTOAuthTicketRecordStorageMySQLImpl($mySQLConn,$config->OAUTH_TICKET_SYSTEM_FORMAT_CONSTRAINTS);
 
         $EmailSender = new VeriCodeEmailSenderImplWithProvider(
             new AliyunServiceProvider($config->ALIYUN_ACCESS_KEY_ID,$config->ALIYUN_ACCESS_KEY_SECRET),
@@ -72,7 +74,8 @@ class PDK2021Wrapper{
             $APPTokenStorage,
             $AuthCodeStorage,
             $MaskIDStorage,
-            $EXTOAuthStorageRecordStorage
+            $EXTOAuthStorageRecordStorage,
+            $EXTTicketRecordStorage
         );
     }
     public static function installDB() : void{
@@ -91,7 +94,8 @@ class PDK2021Wrapper{
         $APPTokenStorage = new APPTokenStorageMySQLImpl($mySQLConn);
         $MaskIDStorage = new MaskIDStorageMySQLImpl($mySQLConn);
         $EXTOAuthStorageRecordStorage = new EXTOAuthStorageRecordStorageMySQLImpl($mySQLConn);
-        
+        $EXTTicketRecordStorage = new EXTOAuthTicketRecordStorageMySQLImpl($mySQLConn,$config->OAUTH_TICKET_SYSTEM_FORMAT_CONSTRAINTS);
+
         $LoggerStorage->createTables();
         $VeriCodeStorage->createTables();
         $UserEntityStorage->createTables();
@@ -102,6 +106,7 @@ class PDK2021Wrapper{
         $APPTokenStorage->createTables();
         $MaskIDStorage->createTables();
         $EXTOAuthStorageRecordStorage->createTables();
+        $EXTTicketRecordStorage->createTables();
         
 
         $mySQLConn->disconnect();

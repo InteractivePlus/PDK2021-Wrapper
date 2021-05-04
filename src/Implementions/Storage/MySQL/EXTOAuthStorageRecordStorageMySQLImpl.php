@@ -205,7 +205,7 @@ class EXTOAuthStorageRecordStorageMySQLImpl extends OAuthStorageRecordStorage{
         }
         return $count;
     }
-    public function clearAuthCode(int $createTimeStart = -1, int $createTimeEnd = -1, int $lastUpdateStart = -1, int $lastUpdateEnd = -1, ?string $relatedMaskID = null, ?string $relatedClientID = null, int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, int $dataOffset = 0, int $dataCountLimit = -1) : void{
+    public function clearStorageRecord(int $createTimeStart = -1, int $createTimeEnd = -1, int $lastUpdateStart = -1, int $lastUpdateEnd = -1, ?string $relatedMaskID = null, ?string $relatedClientID = null, int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, int $dataOffset = 0, int $dataCountLimit = -1) : void{
         if(!empty($relatedMaskID)){
             $this->db->where('mask_id','%' . $relatedMaskID . '%', 'LIKE');
         }
