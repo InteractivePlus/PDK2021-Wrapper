@@ -118,8 +118,6 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         $insertResult = $this->db->insert('oauth_ext_ticket_records',$dataToInsert);
         if(!$insertResult){
             throw new PDKStorageEngineError('failed to insert data to database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
-        }else{
-            return;
         }
         foreach($entity->contentListing as $content){
             $this->insertOAuthReponse($entity->getTicketID(),$content);
@@ -179,7 +177,9 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
 
     protected function getTicketResponseRows(string $ticketID) : array{
         $this->db->where('related_ticket_id',$ticketID);
+        $this->db->orderBy('responded','ASC');
         $rows = $this->db->get('oauth_ext_ticket_response_records');
+        
         if($rows === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }

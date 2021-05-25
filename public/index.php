@@ -6,6 +6,7 @@ use InteractivePlus\PDK2021\Controllers\OAuthSystem\AccessCodeController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\APPAbilityController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\AuthCodeController;
 use InteractivePlus\PDK2021\Controllers\OAuthSystem\EXT_StorageAbilityController;
+use InteractivePlus\PDK2021\Controllers\OAuthSystem\EXT_TicketAbilityController;
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoggedInFunctionController;
 use InteractivePlus\PDK2021\Controllers\UserSystem\LoginController;
@@ -139,6 +140,11 @@ if(PDK2021Wrapper::$pdkCore->getEXTOAuthStorageRecordStorage() !== null){
     $app->get('/oauth_ability/storage/is_record',EXT_StorageAbilityController::class . ':isDataPresent');
     $app->get('/oauth_ability/storage/data',EXT_StorageAbilityController::class . ':getData');
     $app->put('/oauth_ability/storage/data',EXT_StorageAbilityController::class . ':putData');
+}
+
+if(PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage() !== null){
+    $app->post('/tickets',EXT_TicketAbilityController::class . ':createTicket');
+    $app->get('/tickets',EXT_TicketAbilityController::class . ':listOwnedTickets');
 }
 
 $app->run();
