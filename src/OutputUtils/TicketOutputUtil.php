@@ -15,12 +15,12 @@ class TicketOutputUtil{
             'content' => $singleContent->getContentStr()
         );
     }
-    public static function getTicketAsAssoc(OAuthTicketRecordEntity $ticket) : array{
+    public static function getTicketAsAssoc(OAuthTicketRecordEntity $ticket, bool $hideImportantInfo = true) : array{
         $contentListings = [];
         foreach($ticket->contentListing as $singleContent){
             $contentListings[] = self::getTicketSingleContentAsAssoc($singleContent);
         }
-        return array(
+        $result = array(
             'title' => $ticket->getTicketTitle(),
             'content_listing' => $contentListings,
             'ticket_id' => $ticket->getTicketID(),
@@ -33,5 +33,14 @@ class TicketOutputUtil{
             'created' => $ticket->createTime,
             'last_updated' => $ticket->lastUpdateTime
         );
+        if($hideImportantInfo){
+            if(!empty($result['mask_id'])){
+                unset($result['uid']);
+            }
+            if(!empty($result['client_id'])){
+                unset($result['appuid']);
+            }
+        }
+        return $result;
     }
 }
