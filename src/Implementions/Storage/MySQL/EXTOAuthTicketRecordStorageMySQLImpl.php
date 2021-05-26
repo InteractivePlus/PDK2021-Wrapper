@@ -309,6 +309,7 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         int $relatedUID = UserSystemConstants::NO_USER_RELATED_UID,
         ?string $relatedMaskID = null,
         ?string $relatedClientID = null,
+        ?string $title = null,
         int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, 
         ?string $relatedAccessToken = null,
         int $dataOffset = 0, 
@@ -347,6 +348,9 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         if($relatedClientID !== null){
             $this->db->where('client_id',$relatedClientID);
         }
+        if($title !== null){
+            $this->db->where('title','%' . $title . '%','LIKE');
+        }
         if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$relatedAPPUID);
         }
@@ -362,15 +366,18 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         if($result === null){
             throw new PDKStorageEngineError('failed to fetch data from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
+        $resultCount = $this->db->count;
+        $resultTotalCount = $this->db->totalCount;
+
         $resultObjArr = array();
         foreach($result as $singleRow){
             $currentTicketRelatedContentRows = $this->getTicketResponseRows($singleRow['ticket_id']);
             $resultObjArr[] = $this->getTicketRecordEntityByDatabaseRow($singleRow,$currentTicketRelatedContentRows);
         }
         return new MultipleResult(
-            $this->db->count,
+            $resultCount,
             $resultObjArr,
-            $this->db->totalCount,
+            $resultTotalCount,
             0
         );
     }
@@ -382,6 +389,7 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         int $relatedUID = UserSystemConstants::NO_USER_RELATED_UID,
         ?string $relatedMaskID = null,
         ?string $relatedClientID = null,
+        ?string $title = null,
         int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, 
         ?string $relatedAccessToken = null
     ) : int{
@@ -406,6 +414,9 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         if($relatedClientID !== null){
             $this->db->where('client_id',$relatedClientID);
         }
+        if($title !== null){
+            $this->db->where('title','%' . $title . '%','LIKE');
+        }
         if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$relatedAPPUID);
         }
@@ -426,11 +437,13 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         int $relatedUID = UserSystemConstants::NO_USER_RELATED_UID,
         ?string $relatedMaskID = null,
         ?string $relatedClientID = null,
+        ?string $title = null,
         int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, 
         ?string $relatedAccessToken = null,
         int $dataOffset = 0, 
         int $dataCountLimit = -1
     ) : void{
+        //WARNING & TODO: WE DIDN'T DELETE ALL RELATED SINGLE RECORDS!
         if($createTimeStart >= 0){
             $this->db->where('created',$createTimeStart,'>=');
         }
@@ -452,6 +465,9 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         if($relatedClientID !== null){
             $this->db->where('client_id',$relatedClientID);
         }
+        if($title !== null){
+            $this->db->where('title','%' . $title . '%','LIKE');
+        }
         if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$relatedAPPUID);
         }
@@ -459,7 +475,16 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
             $this->db->where('access_token',$relatedAccessToken);
         }
         $result = $this->db->delete('oauth_ext_ticket_records');
-        if(!$result){
+        
+        //DELETE RECORDS 
+        $delResult = $this->db->mysqli()->query(
+            'DELETE FROM `oauth_ext_ticket_response_records` WHERE NOT EXISTS ( 
+                SELECT * FROM `oauth_ext_ticket_records` 
+                WHERE oauth_ext_ticket_records.ticket_id = oauth_ext_ticket_response_records.related_ticket_id
+            )'
+        );
+
+        if(!$result || !$delResult){
             throw new PDKStorageEngineError('failed to delete from database',MySQLErrorParams::paramsFromMySQLiDBObject($this->db));
         }
     }

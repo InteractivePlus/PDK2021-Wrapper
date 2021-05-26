@@ -3,6 +3,7 @@ namespace InteractivePlus\PDK2021\Controllers\OAuthSystem;
 
 use InteractivePlus\PDK2021\Controllers\ReturnableResponse;
 use InteractivePlus\PDK2021\GatewayFunctions\CommonFunction;
+use InteractivePlus\PDK2021\OutputUtils\MultipleResultOutputUtil;
 use InteractivePlus\PDK2021\OutputUtils\TicketOutputUtil;
 use InteractivePlus\PDK2021\PDK2021Wrapper;
 use InteractivePlus\PDK2021Core\APP\Formats\APPFormat;
@@ -176,6 +177,7 @@ class EXT_TicketAbilityController{
             $searchUIDParam,
             $searchMaskIDParam,
             $searchClientIDParam,
+            null,
             APPSystemConstants::NO_APP_RELATED_APPUID,
             null,
             0,
@@ -283,6 +285,189 @@ class EXT_TicketAbilityController{
 
         $returnResponse = new ReturnableResponse(201,0);
         $returnResponse->returnDataLevelEntries['ticket'] = TicketOutputUtil::getTicketAsAssoc($ticketEntity);
+        return $returnResponse->toResponse($response);
+    }
+    public function getTicketInfo(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REQ_TICKETID = $args['ticket_id'];
+
+        $REQ_IS_FRONTEND_TOKEN = $REQ_PARAMS['is_frontend_token'];
+        $REQ_UID = $REQ_PARAMS['uid']; //Only Present if using frontend token
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token']; //OAuth/Frontend Token
+
+        $REQ_CLIENT_ID = $REQ_PARAMS['client_id']; //Only present when APP is trying to respond
+        $REQ_CLIENT_SECRET = $REQ_PARAMS['client_secret']; //Only present when client_id is introduced
+
+        $ctime = time();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+
+        if(empty($REQ_TICKETID) || !is_string($REQ_TICKETID) || !OAuthTicketFormat::isValidTicketID($REQ_TICKETID)){
+            return ReturnableResponse::fromIncorrectFormattedParam('ticket_id')->toResponse($response);
+        }
+
+
+        $ticketStorage = PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage();
+        $ticketEntity = null;
+
+        if(empty($REQ_CLIENT_ID)){
+            //User responding
+            if($REQ_IS_FRONTEND_TOKEN){
+                $verifyFrontendTokenResult = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+                if($verifyFrontendTokenResult !== null){
+                    return $verifyFrontendTokenResult->toResponse($response);
+                }
+                $ticketEntity = $ticketStorage->getOAuthTicketRecord($REQ_TICKETID);
+                if($ticketEntity === null || $ticketEntity->uid !== intval($REQ_UID)){
+                    return ReturnableResponse::fromPermissionDeniedError("You don't have permission to view this ticket")->toResponse($response);
+                }
+            }else{
+                $verifyAPPTokenResult = CommonFunction::checkAPPTokenValidResponse($REQ_ACCESS_TOKEN,$ctime);
+                if(!$verifyAPPTokenResult->succeed){
+                    return $verifyAPPTokenResult->returnableResponse->toResponse($response);
+                }
+                $ticketEntity = $ticketStorage->getOAuthTicketRecord($REQ_TICKETID);
+                if($ticketEntity === null || $ticketEntity->getMaskID() !== $verifyAPPTokenResult->tokenEntity->getMaskID()){
+                    return ReturnableResponse::fromPermissionDeniedError("You don't have permission to view this ticket")->toResponse($response);
+                }
+            }
+        }else{
+            $checkAPPSecretResult = CommonFunction::checkAPPSecretResponse($REQ_CLIENT_ID,$REQ_CLIENT_SECRET);
+            if(!$checkAPPSecretResult->succeed){
+                return $checkAPPSecretResult->returnableResponse->toResponse($response);
+            }
+            $ticketEntity = $ticketStorage->getOAuthTicketRecord($REQ_TICKETID);
+            if($ticketEntity === null || $ticketEntity->getClientID() !== $checkAPPSecretResult->appEntity->getClientID()){
+                return ReturnableResponse::fromPermissionDeniedError("You don't have permission to view this ticket")->toResponse($response);
+            }
+        }
+
+        $returnResponse = new ReturnableResponse(200,0);
+        $returnResponse->returnDataLevelEntries['ticket'] = TicketOutputUtil::getTicketAsAssoc($ticketEntity);
+        return $returnResponse->toResponse($response);
+    }
+    public function getAPPOwnedTicketCounts(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REQ_CLIENT_ID = $args['client_id'];
+        $REQ_CLIENT_SECRET = $REQ_PARAMS['client_secret'];
+        $REQ_MASKID = $REQ_PARAMS['mask_id']; //Optional Param to filter
+        $REQ_TITLE = $REQ_PARAMS['title']; //Optional Param to filter
+
+        $verifyClientSecretResult = CommonFunction::checkAPPSecretResponse($REQ_CLIENT_ID,$REQ_CLIENT_SECRET);
+        if(!$verifyClientSecretResult->succeed){
+            return $verifyClientSecretResult->returnableResponse->toResponse($response);
+        }
+
+        $searchMaskID = null;
+        $searchTitle = null;
+
+        if(empty($REQ_MASKID)){
+            $searchMaskID = null;
+        }else{
+            if(!is_string($REQ_MASKID) || !MaskIDFormat::isValidMaskID($REQ_MASKID)){
+                return ReturnableResponse::fromIncorrectFormattedParam('mask_id')->toResponse($response);
+            }
+            $searchMaskID = MaskIDFormat::formatMaskID($REQ_MASKID);
+        }
+
+        if(empty($REQ_TITLE)){
+            $searchTitle = null;
+        }else{
+            if(!is_string($REQ_TITLE)){
+                return ReturnableResponse::fromIncorrectFormattedParam('title')->toResponse($response);
+            }
+            $searchTitle = $REQ_TITLE;
+        }
+
+        $ticketStorage = PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage();
+        $searchedTicketCount = $ticketStorage->getOAuthTicketRecordEntityCount(
+            -1,
+            -1,
+            -1,
+            -1,
+            UserSystemConstants::NO_USER_RELATED_UID,
+            $searchMaskID,
+            APPFormat::formatAPPID($REQ_CLIENT_ID),
+            $searchTitle,
+            APPSystemConstants::NO_APP_RELATED_APPUID,
+            null
+        );
+        
+        $returnResponse = new ReturnableResponse(200,0);
+        $returnResponse->returnDataLevelEntries['total_count'] = $searchedTicketCount;
+        return $returnResponse->toResponse($response);
+    }
+    public function getAPPOwnedTickets(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = $request->getQueryParams();
+        $REQ_CLIENT_ID = $args['client_id'];
+        $REQ_CLIENT_SECRET = $REQ_PARAMS['client_secret'];
+        $REQ_MASKID = $REQ_PARAMS['mask_id']; //Optional Param to filter
+        $REQ_TITLE = $REQ_PARAMS['title']; //Optional Param to filter
+        $REQ_OFFSET = $REQ_PARAMS['offset'];
+        $REQ_COUNT = $REQ_PARAMS['count'];
+
+        if(empty($REQ_OFFSET)){
+            $REQ_OFFSET = 0;
+        }else{
+            $REQ_OFFSET = intval($REQ_OFFSET);
+        }
+
+        if(empty($REQ_COUNT)){
+            $REQ_COUNT = -1;
+        }else{
+            $REQ_COUNT = intval($REQ_COUNT);
+            if($REQ_COUNT < -1){
+                $REQ_COUNT = -1;
+            }
+        }
+
+        if($REQ_COUNT === 0){
+            return ReturnableResponse::fromIncorrectFormattedParam('count')->toResponse($response);
+        }
+
+        $verifyClientSecretResult = CommonFunction::checkAPPSecretResponse($REQ_CLIENT_ID,$REQ_CLIENT_SECRET);
+        if(!$verifyClientSecretResult->succeed){
+            return $verifyClientSecretResult->returnableResponse->toResponse($response);
+        }
+
+        $searchMaskID = null;
+        $searchTitle = null;
+
+        if(empty($REQ_MASKID)){
+            $searchMaskID = null;
+        }else{
+            if(!is_string($REQ_MASKID) || !MaskIDFormat::isValidMaskID($REQ_MASKID)){
+                return ReturnableResponse::fromIncorrectFormattedParam('mask_id')->toResponse($response);
+            }
+            $searchMaskID = MaskIDFormat::formatMaskID($REQ_MASKID);
+        }
+
+        if(empty($REQ_TITLE)){
+            $searchTitle = null;
+        }else{
+            if(!is_string($REQ_TITLE)){
+                return ReturnableResponse::fromIncorrectFormattedParam('title')->toResponse($response);
+            }
+            $searchTitle = $REQ_TITLE;
+        }
+
+        $ticketStorage = PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage();
+        $searchedTickets = $ticketStorage->searchOAuthTicketRecordEntity(
+            -1,
+            -1,
+            -1,
+            -1,
+            UserSystemConstants::NO_USER_RELATED_UID,
+            $searchMaskID,
+            APPFormat::formatAPPID($REQ_CLIENT_ID),
+            $searchTitle,
+            APPSystemConstants::NO_APP_RELATED_APPUID,
+            null,
+            $REQ_OFFSET,
+            $REQ_COUNT
+        );
+        
+        $returnResponse = new ReturnableResponse(200,0);
+        $returnResponse->returnDataLevelEntries['result'] = MultipleResultOutputUtil::getMultipleResultAsAssoc($searchedTickets,array(TicketOutputUtil::class,'getTicketAsAssoc'));
         return $returnResponse->toResponse($response);
     }
 }
