@@ -470,4 +470,94 @@ class EXT_TicketAbilityController{
         $returnResponse->returnDataLevelEntries['result'] = MultipleResultOutputUtil::getMultipleResultAsAssoc($searchedTickets,array(TicketOutputUtil::class,'getTicketAsAssoc'));
         return $returnResponse->toResponse($response);
     }
+    public function changeTicketStatus(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface{
+        $REQ_PARAMS = json_decode($request->getBody(),true);
+        $REQ_TICKETID = $args['ticket_id'];
+
+        $REQ_IS_FRONTEND_TOKEN = $REQ_PARAMS['is_frontend_token'];
+        $REQ_UID = $REQ_PARAMS['uid']; //Only Present if using frontend token
+        $REQ_ACCESS_TOKEN = $REQ_PARAMS['access_token']; //OAuth/Frontend Token
+
+        $REQ_CLIENT_ID = $REQ_PARAMS['client_id']; //Only present when APP is trying to respond
+        $REQ_CLIENT_SECRET = $REQ_PARAMS['client_secret']; //Only present when client_id is introduced
+
+        $REQ_SET_RESOLVED = $REQ_PARAMS['set_resolved'];
+        $REQ_SET_CLOSED = $REQ_PARAMS['set_closed'];
+
+        $ctime = time();
+        $REMOTE_ADDR = $request->getAttribute('ip');
+
+        if(empty($REQ_TICKETID) || !is_string($REQ_TICKETID) || !OAuthTicketFormat::isValidTicketID($REQ_TICKETID)){
+            return ReturnableResponse::fromIncorrectFormattedParam('ticket_id')->toResponse($response);
+        }
+
+
+        $ticketStorage = PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage();
+        $ticketEntity = null;
+
+        if($REQ_SET_RESOLVED === null && !$REQ_SET_CLOSED){
+            return ReturnableResponse::fromIncorrectFormattedParam('set_resolved')->toResponse($response);
+        }
+
+        
+        if(empty($REQ_CLIENT_ID)){
+            //User responding
+            if($REQ_IS_FRONTEND_TOKEN){
+                $verifyFrontendTokenResult = CommonFunction::checkTokenValidResponse($REQ_UID,$REQ_ACCESS_TOKEN,$ctime);
+                if($verifyFrontendTokenResult !== null){
+                    return $verifyFrontendTokenResult->toResponse($response);
+                }
+                $ticketEntity = $ticketStorage->getOAuthTicketRecord($REQ_TICKETID);
+                if($ticketEntity === null || $ticketEntity->uid !== intval($REQ_UID)){
+                    return ReturnableResponse::fromPermissionDeniedError("You don't have permission to edit this ticket")->toResponse($response);
+                }
+            }else{
+                $verifyAPPTokenResult = CommonFunction::checkAPPTokenValidResponse($REQ_ACCESS_TOKEN,$ctime);
+                if(!$verifyAPPTokenResult->succeed){
+                    return $verifyAPPTokenResult->returnableResponse->toResponse($response);
+                }
+                $ticketEntity = $ticketStorage->getOAuthTicketRecord($REQ_TICKETID);
+                if($ticketEntity === null || $ticketEntity->getMaskID() !== $verifyAPPTokenResult->tokenEntity->getMaskID()){
+                    return ReturnableResponse::fromPermissionDeniedError("You don't have permission to edit this ticket")->toResponse($response);
+                }
+            }
+        }else{
+            $checkAPPSecretResult = CommonFunction::checkAPPSecretResponse($REQ_CLIENT_ID,$REQ_CLIENT_SECRET);
+            if(!$checkAPPSecretResult->succeed){
+                return $checkAPPSecretResult->returnableResponse->toResponse($response);
+            }
+            $ticketEntity = $ticketStorage->getOAuthTicketRecord($REQ_TICKETID);
+            if($ticketEntity === null || $ticketEntity->getClientID() !== $checkAPPSecretResult->appEntity->getClientID()){
+                return ReturnableResponse::fromPermissionDeniedError("You don't have permission to edit this ticket")->toResponse($response);
+            }
+        }
+        if($ticketEntity->isClosed){
+            return ReturnableResponse::fromItemExpiredOrUsedError('ticket_id')->toResponse($response);
+        }
+
+        if($REQ_SET_CLOSED !== null){
+            if($REQ_SET_RESOLVED){
+                $ticketEntity->isResolved = true;
+            }else{
+                $ticketEntity->isResolved = false;
+            }
+        }
+
+        if($REQ_SET_CLOSED){
+            $ticketEntity->isClosed = true;
+        }
+
+        $ticketEntity->lastUpdateTime = $ctime;
+
+        //Update TicketEntity
+        try{
+            $ticketStorage->updateOAuthTicketRecord($ticketEntity);
+        }catch(PDKStorageEngineError $e){
+            return ReturnableResponse::fromPDKException($e)->toResponse($response);
+        }
+
+        $returnResponse = new ReturnableResponse(200,0);
+        $returnResponse->returnDataLevelEntries['ticket'] = TicketOutputUtil::getTicketAsAssoc($ticketEntity);
+        return $returnResponse->toResponse($response);
+    }
 }
