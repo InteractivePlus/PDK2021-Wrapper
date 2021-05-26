@@ -145,6 +145,7 @@ if(PDK2021Wrapper::$pdkCore->getEXTOAuthStorageRecordStorage() !== null){
 if(PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage() !== null){
     $app->post('/tickets',EXT_TicketAbilityController::class . ':createTicket');
     $app->get('/tickets',EXT_TicketAbilityController::class . ':listOwnedTickets');
+    $app->post('/tickets/{ticket_id}/responses',EXT_TicketAbilityController::class . ':respondToTicket');
 }
 
 $app->run();

@@ -31,7 +31,9 @@ class TicketOutputUtil{
             'access_token' => $ticket->getAccessToken(),
             'is_urgent' => $ticket->isUrgent,
             'created' => $ticket->createTime,
-            'last_updated' => $ticket->lastUpdateTime
+            'last_updated' => $ticket->lastUpdateTime,
+            'is_resolved' => $ticket->isResolved,
+            'is_closed' => $ticket->isClosed
         );
         if($hideImportantInfo){
             if(!empty($result['mask_id'])){

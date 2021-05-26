@@ -46,6 +46,8 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
                 `is_urgent` TINYINT(1) NOT NULL,
                 `created` INT UNSIGNED NOT NULL,
                 `last_updated` INT UNSIGNED NOT NULL,
+                `is_resolved` TINYINT(1) NOT NULL,
+                `is_closed` TINYINT(1) NOT NULL,
                 PRIMARY KEY ( `ticket_id` )
             )ENGINE=InnoDB CHARSET=utf8;"
         );
@@ -113,7 +115,9 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
             'access_token' => $entity->getAccessToken(),
             'is_urgent' => $entity->isUrgent ? 1 : 0,
             'created' => $entity->createTime,
-            'last_updated' => $entity->lastUpdateTime
+            'last_updated' => $entity->lastUpdateTime,
+            'is_resolved' => $entity->isResolved ? 1 : 0,
+            'is_closed' => $entity->isClosed ? 1 : 0
         );
         $insertResult = $this->db->insert('oauth_ext_ticket_records',$dataToInsert);
         if(!$insertResult){
@@ -155,9 +159,11 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
             $dataRow['uid'],
             $dataRow['mask_id'],
             $dataRow['access_token'],
-            $dataRow['is_urgent'] === 1 ? true : false, 
+            $dataRow['is_urgent'] === 1, 
             $dataRow['created'],
             $dataRow['last_updated'],
+            $dataRow['is_resolved'] === 1,
+            $dataRow['is_closed'] === 1,
             $this->getFormatSetting()
         );
         return $newEntity;
@@ -213,7 +219,9 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
             'access_token' => $entity->getAccessToken(),
             'is_urgent' => $entity->isUrgent ? 1 : 0,
             'created' => $entity->createTime,
-            'last_update' => $entity->lastUpdateTime
+            'last_updated' => $entity->lastUpdateTime,
+            'is_resolved' => $entity->isResolved ? 1 : 0,
+            'is_closed' => $entity->isClosed ? 1 : 0
         );
         $this->db->where('ticket_id',$entity->getTicketID());
 

@@ -177,6 +177,25 @@ class CommonFunction{
         }
         return new CheckAPPTokenResponse(true,null,$checkTokenResponse->tokenEntity);
     }
+    public static function checkAPPSecretResponse($client_id, $client_secret) : CheckAPPSecretResponse{
+        if(empty($client_id) || !is_string($client_id) || !APPFormat::isValidAPPID($client_id)){
+            return new CheckAPPSecretResponse(false,ReturnableResponse::fromIncorrectFormattedParam('client_id'),null);
+        }
+        if(empty($client_secret) || !is_string($client_secret) || !APPFormat::isValidAPPSecert($client_secret)){
+            return new CheckAPPSecretResponse(false,ReturnableResponse::fromIncorrectFormattedParam('client_secret'),null);
+        }
+        
+        $appEntityStorage = PDK2021Wrapper::$pdkCore->getAPPEntityStorage();
+        $APPEntity = $appEntityStorage->getAPPEntityByClientID($client_id);
+        if($APPEntity === null){
+            return new CheckAPPSecretResponse(false,ReturnableResponse::fromCredentialMismatchError('client_secret'),null);
+        }
+        if(!$APPEntity->checkClientSecret($client_secret)){
+            return new CheckAPPSecretResponse(false,ReturnableResponse::fromCredentialMismatchError('client_secret'),$APPEntity);
+        }
+        
+        return new CheckAPPSecretResponse(true,null,$APPEntity);
+    }
     public static function sendVeriCode(VeriCodeID $veriCodeID, $preferredSendMethod, UserEntity $user, int $currentTime, string $remoteAddr, int $appuid = APPSystemConstants::INTERACTIVEPDK_APPUID) : SendVeriCodeResponse{
         $actualSendingMethod = SentMethod::NOT_SENT;
         $veriCode = new VeriCodeEntity(
