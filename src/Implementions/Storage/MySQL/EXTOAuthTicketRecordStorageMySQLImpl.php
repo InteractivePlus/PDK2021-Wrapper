@@ -310,6 +310,10 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         ?string $relatedMaskID = null,
         ?string $relatedClientID = null,
         ?string $title = null,
+        bool $limitResolvedStatus = false,
+        bool $resolvedStatus = false,
+        bool $limitClosedStatus = false,
+        bool $closedStatus = false,
         int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, 
         ?string $relatedAccessToken = null,
         int $dataOffset = 0, 
@@ -351,6 +355,12 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         if($title !== null){
             $this->db->where('title','%' . $title . '%','LIKE');
         }
+        if($limitResolvedStatus){
+            $this->db->where('is_resolved',$resolvedStatus ? 1 : 0);
+        }
+        if($limitClosedStatus){
+            $this->db->where('is_closed',$closedStatus ? 1 : 0);
+        }
         if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$relatedAPPUID);
         }
@@ -390,6 +400,10 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         ?string $relatedMaskID = null,
         ?string $relatedClientID = null,
         ?string $title = null,
+        bool $limitResolvedStatus = false,
+        bool $resolvedStatus = false,
+        bool $limitClosedStatus = false,
+        bool $closedStatus = false,
         int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, 
         ?string $relatedAccessToken = null
     ) : int{
@@ -417,6 +431,12 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         if($title !== null){
             $this->db->where('title','%' . $title . '%','LIKE');
         }
+        if($limitResolvedStatus){
+            $this->db->where('is_resolved',$resolvedStatus ? 1 : 0);
+        }
+        if($limitClosedStatus){
+            $this->db->where('is_closed',$closedStatus ? 1 : 0);
+        }
         if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$relatedAPPUID);
         }
@@ -438,6 +458,10 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         ?string $relatedMaskID = null,
         ?string $relatedClientID = null,
         ?string $title = null,
+        bool $limitResolvedStatus = false,
+        bool $resolvedStatus = false,
+        bool $limitClosedStatus = false,
+        bool $closedStatus = false,
         int $relatedAPPUID = APPSystemConstants::NO_APP_RELATED_APPUID, 
         ?string $relatedAccessToken = null,
         int $dataOffset = 0, 
@@ -467,6 +491,12 @@ class EXTOAuthTicketRecordStorageMySQLImpl extends OAuthTicketRecordStorage{
         }
         if($title !== null){
             $this->db->where('title','%' . $title . '%','LIKE');
+        }
+        if($limitResolvedStatus){
+            $this->db->where('is_resolved',$resolvedStatus ? 1 : 0);
+        }
+        if($limitClosedStatus){
+            $this->db->where('is_closed',$closedStatus ? 1 : 0);
         }
         if($relatedAPPUID !== APPSystemConstants::NO_APP_RELATED_APPUID){
             $this->db->where('appuid',$relatedAPPUID);
