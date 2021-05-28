@@ -78,7 +78,7 @@ class LoginController{
         $reasonReceiver = LoginFailedReasons::UNKNOWN;
         if(!$userEntity->checkIfCanLogin($reasonReceiver)){
             $result = ReturnableResponse::fromPermissionDeniedError('you cannot login at this time');
-            $result->returnFirstLevelEntries['errorReason'] = $reasonReceiver;
+            $result->returnDataLevelEntries['errorReason'] = $reasonReceiver;
             if($reasonReceiver !== LoginFailedReasons::UNKNOWN && $reasonReceiver !== LoginFailedReasons::ACCOUNT_FROZEN){
                 if(($reasonReceiver === LoginFailedReasons::EITHER_NOT_VERIFIED || $reasonReceiver === LoginFailedReasons::EMAIL_NOT_VERIFIED) && !empty($userEntity->getEmail())){
                     $result->returnDataLevelEntries['email'] = $userEntity->getEmail();
