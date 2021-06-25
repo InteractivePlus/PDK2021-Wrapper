@@ -87,8 +87,6 @@ $customErrorHandler = function(
 
 $errMiddleWare->setDefaultErrorHandler($customErrorHandler);
 
-$app->addMiddleware(new PDKCORSMiddleware());
-
 $app->get('/captcha',SimpleCaptchaController::class . ':getSimpleCaptcha');
 $app->get('/captcha/{captcha_id}/submitResult',SimpleCaptchaController::class . ':getSimpleCaptchaSubmitResult');
 
@@ -151,5 +149,7 @@ if(PDK2021Wrapper::$pdkCore->getEXTOAuthTicketRecordStorage() !== null){
     $app->get('/apps/{client_id}/tickets',EXT_TicketAbilityController::class . ':getAPPOwnedTickets');
     $app->patch('/tickets/{ticket_id}',EXT_TicketAbilityController::class . ':changeTicketStatus');
 }
+
+(new PDKCORSMiddleware())->addThisMiddleware($app);
 
 $app->run();

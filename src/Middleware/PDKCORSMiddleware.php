@@ -6,6 +6,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\App;
+use Slim\Exception\HttpNotFoundException;
 
 class PDKCORSMiddleware implements MiddlewareInterface{
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface{
@@ -21,5 +23,14 @@ class PDKCORSMiddleware implements MiddlewareInterface{
             ->withHeader('Access-Control-Allow-Headers','X-Requested-With, Content-Type, Accept, Origin, Authorization')
             ->withHeader('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, PATCH, OPTIONS');
         return $response;
+    }
+    public function addThisMiddleware(App &$app){
+        $app->options('/{routes:.+}', function ($request, $response, $args) {
+            return $response;
+        });
+        $app->add($this);
+        $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function ($request, $response) {
+            throw new HttpNotFoundException($request);
+        });
     }
 }
