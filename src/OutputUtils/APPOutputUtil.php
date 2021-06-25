@@ -15,7 +15,8 @@ class APPOutputUtil{
             'client_type' => $appEntity->getClientType(),
             'redirectURI' => $appEntity->redirectURI,
             'create_time' => $appEntity->createTime,
-            'owner_uid' => $appEntity->ownerUID
+            'owner_uid' => $appEntity->ownerUID,
+            'permission' => $appEntity->getPermission()->toAssocArray()
         );
     }
 }
