@@ -569,10 +569,10 @@ class VeriCodeController{
                     return ReturnableResponse::fromItemNotFound('username')->toResponse($response);
                 }
             }else{
-                return ReturnableResponse::fromIncorrectFormattedParam('email|phone|username')->toResponse($response);
+                return ReturnableResponse::fromIncorrectFormattedParam('username|email|phone')->toResponse($response);
             }
             if($UserEntity === null){
-                return ReturnableResponse::fromItemNotFound('email|phone|username')->toResponse($response);
+                return ReturnableResponse::fromItemNotFound('username|email|phone')->toResponse($response);
             }
             $reasonReceiver = LoginFailedReasons::UNKNOWN;
             if(!$UserEntity->checkIfCanLogin($reasonReceiver)){
